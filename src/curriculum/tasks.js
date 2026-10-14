@@ -2,11 +2,12 @@ import { CONFIG } from '../config.js';
 import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, CHEERS, soundsAlike, graphemes } from './units.js';
 import { shuffle, pick } from './random.js';
 import { unlockedLetters } from './unlock.js';
-import { phoneme, word, prompt, imgPath } from '../audio/clips.js';
+import { phoneme, word, prompt, imgPath, letterName } from '../audio/clips.js';
 import { nameLetters } from '../state/name.js';
 
 const pictureChoice = (w, correct) => ({ id: w, label: w, img: imgPath(w), audio: word(w), correct });
-const letterChoice = (l, correct) => ({ id: l, label: l, audio: phoneme(l), correct });
+// Letters are narrated by name ("ess, aitch" for sh); saying their sounds would give the answer away.
+const letterChoice = (l, correct) => ({ id: l, label: l, audio: phoneme(l), narration: [...l].map(letterName), correct });
 
 const distinct = (pool, count, rng) => shuffle([...new Set(pool)], rng).slice(0, count);
 const pictureDistractors = (pool, rng) => distinct(pool, CONFIG.PICTURE_CHOICES - 1, rng).map((w) => pictureChoice(w, false));
@@ -50,6 +51,7 @@ function letterSoundTask(letter, progress, rng) {
   const distractors = [...taught, ...later].slice(0, CONFIG.LETTER_CHOICES - 1);
   return {
     activity: 'pickOne',
+    narrate: true,
     prompt: [prompt('find_the_letter'), phoneme(letter)],
     choices: shuffle([letterChoice(letter, true), ...distractors.map((l) => letterChoice(l, false))], rng),
   };

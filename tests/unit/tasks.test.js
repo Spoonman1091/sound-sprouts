@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createProgress, setChildName } from '../../src/state/progress.js';
 import { buildTask } from '../../src/curriculum/tasks.js';
 import { RHYME_SETS, FIRST_SOUND_WORDS, BLEND_WORDS, LETTER_ORDER } from '../../src/curriculum/units.js';
-import { prompt, phoneme, word } from '../../src/audio/clips.js';
+import { prompt, phoneme, word, letterName } from '../../src/audio/clips.js';
 import { seededRng, withMastered } from '../helpers.js';
 
 const fresh = createProgress();
@@ -23,12 +23,22 @@ describe('buildTask', () => {
     task.choices.filter((c) => !c.correct).forEach((c) => expect(RHYME_SETS[0]).not.toContain(c.id));
   });
 
-  it('names the pictures aloud for rhyme and first-sound questions, but not letter or blend ones', () => {
+  it('narrates the choices for rhyme, first-sound and letter questions, but not blends', () => {
     const narrate = (id) => buildTask(id, { progress: fresh, rng: seededRng(1) }).narrate;
     expect(narrate('rhyme:0')).toBe(true);
     expect(narrate('fs:s')).toBe(true);
-    expect(narrate('ls:s')).toBeFalsy();
+    expect(narrate('ls:s')).toBe(true);
     expect(narrate('blend:pin')).toBeFalsy();
+  });
+
+  it('letter choices are narrated by letter name, so the sound is not given away', () => {
+    const all = withMastered(undefined, LETTER_ORDER.map((l) => `ls:${l}`));
+    const task = buildTask('ls:sh', { progress: all, rng: seededRng(2) });
+    task.choices.forEach((c) => {
+      expect(c.narration).toEqual([...c.id].map(letterName));
+      expect(c.narration).not.toContain(phoneme('sh'));
+    });
+    expect(task.choices.find((c) => c.correct).narration).toEqual([letterName('s'), letterName('h')]);
   });
 
   it('first-sound task offers a matching word and a non-matching distractor', () => {

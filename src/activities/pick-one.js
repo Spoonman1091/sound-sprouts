@@ -36,7 +36,8 @@ export function runPickOne(container, task, deps) {
       const remaining = buttons.filter((button) => !button.disabled);
       for (const button of remaining) {
         button.classList.add('narrating');
-        await player.play(task.choices[buttons.indexOf(button)].audio);
+        const choice = task.choices[buttons.indexOf(button)];
+        for (const clip of choice.narration ?? [choice.audio]) await player.play(clip);
         button.classList.remove('narrating');
       }
     };

@@ -200,6 +200,21 @@ describe('runPickOne', () => {
       expect(player.play.mock.calls.map(([clip]) => clip)).toEqual(['pig.mp3', prompt('try_again'), 'sun.mp3']);
     });
 
+    it('says a choice\'s narration clips instead of its answer audio when it has them', async () => {
+      const root = document.createElement('div');
+      const player = fakePlayer();
+      const letters = {
+        ...narrated,
+        choices: [
+          { id: 'sh', label: 'sh', audio: 'sh-sound.mp3', narration: ['ess.mp3', 'aitch.mp3'], correct: true },
+          { id: 'p', label: 'p', audio: 'p-sound.mp3', narration: ['pee.mp3'], correct: false },
+        ],
+      };
+      runPickOne(root, letters, { player });
+      await flush();
+      expect(player.play.mock.calls.map(([clip]) => clip)).toEqual(['ess.mp3', 'aitch.mp3', 'pee.mp3']);
+    });
+
     it('does not name the choices unless the task asks for it', async () => {
       const root = document.createElement('div');
       const player = fakePlayer();
