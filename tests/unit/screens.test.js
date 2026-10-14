@@ -11,8 +11,8 @@ describe('renderGarden', () => {
   it('draws one plot per letter with its status', () => {
     const garden = renderGarden(withMastered(undefined, ['ls:s']), { bloomed: ['s'] });
     const plots = [...garden.querySelectorAll('.plot')];
-    expect(plots.map((p) => p.dataset.letter)).toEqual(['s', 'a', 't', 'p', 'i', 'n']);
-    expect(plots.map((p) => p.dataset.status)).toEqual(['flower', 'sprout', 'seed', 'seed', 'seed', 'seed']);
+    expect(plots.map((p) => p.dataset.letter)).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o']);
+    expect(plots.map((p) => p.dataset.status)).toEqual(['flower', 'sprout', ...Array(8).fill('seed')]);
     expect(plots[0].classList.contains('bloom')).toBe(true);
     expect(plots[2].querySelector('.seed')).not.toBeNull();
   });

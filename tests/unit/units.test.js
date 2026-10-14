@@ -2,6 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS } from '../../src/curriculum/units.js';
 
 describe('curriculum data', () => {
+  it('teaches s a t p, i n m d, g o in order', () => {
+    expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o']);
+    ['m', 'd', 'g', 'o'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
+    expect(BLEND_WORDS).toEqual(expect.arrayContaining(['dog', 'pig', 'map', 'sad', 'man']));
+  });
+
   it('first-sound words start with their letter', () => {
     Object.entries(FIRST_SOUND_WORDS).forEach(([letter, words]) => {
       expect(LETTER_ORDER).toContain(letter);

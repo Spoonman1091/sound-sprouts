@@ -16,7 +16,7 @@ describe('renderDashboard', () => {
   it('shows a row per letter with status', () => {
     const { root } = render({ progress: withMastered(undefined, ['ls:s']) });
     const rows = [...root.querySelectorAll('tbody tr')].map((tr) => tr.textContent);
-    expect(rows).toHaveLength(6);
+    expect(rows).toHaveLength(10);
     expect(rows[0]).toContain('Mastered');
     expect(rows[1]).toContain('Learning');
     expect(rows[2]).toContain('Not started');

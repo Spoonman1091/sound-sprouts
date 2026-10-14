@@ -27,7 +27,7 @@ describe('recording clips', () => {
   it('groups letter sounds, prompts, words and letter names', () => {
     expect(RECORDING_GROUPS.map((g) => g.kind)).toEqual(['phoneme', 'prompt', 'word', 'letter']);
     const ids = (kind) => RECORDING_CLIPS.filter((c) => c.kind === kind).map((c) => c.id);
-    expect(ids('phoneme')).toEqual(['s', 'a', 't', 'p', 'i', 'n']);
+    expect(ids('phoneme')).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o']);
     expect(ids('prompt').sort()).toEqual([...PROMPT_IDS].sort());
     expect(ids('word').sort()).toEqual([...PICTURE_WORDS].sort());
     expect(ids('letter')).toHaveLength(26);

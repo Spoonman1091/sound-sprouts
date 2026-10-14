@@ -21,8 +21,8 @@ A free, ad-free, account-free early-reading web app built on systematic syntheti
 ## Slice 1 scope (this plan)
 
 - **Phonemic awareness:** rhyming (picture choice).
-- **Letter sounds:** s, a, t, p, i, n. Two activity types: "find the letter that says /s/" and "which picture starts with /s/" (no picture set for short /i/).
-- **Blending:** CVC words built only from mastered letters (pin, tap, pan, tin, sip, nap).
+- **Letter sounds:** s, a, t, p, i, n, then m, d, g, o. Two activity types: "find the letter that says /s/" and "which picture starts with /s/" (no picture set for short /i/).
+- **Blending:** CVC words built only from mastered letters (pin, tap, pan, tin, sip, nap, dog, pig, map, sad, man).
 - **Name spelling:** tap the letters of her first name in order.
 - **Garden progress map:** one plot per letter: seed (locked), sprout (learning), flower (mastered), wilted (mastered but recently missed).
 - **Parent area** behind a press-and-hold + arithmetic gate: set the child's name, per-letter status, "needs practice" list, sessions this week, printable mini-book, reset, audio/storage warnings, credits.

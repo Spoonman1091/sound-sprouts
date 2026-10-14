@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createProgress, setChildName } from '../../src/state/progress.js';
 import { buildTask } from '../../src/curriculum/tasks.js';
-import { RHYME_SETS, FIRST_SOUND_WORDS, BLEND_WORDS } from '../../src/curriculum/units.js';
+import { RHYME_SETS, FIRST_SOUND_WORDS, BLEND_WORDS, LETTER_ORDER } from '../../src/curriculum/units.js';
 import { prompt, phoneme, word } from '../../src/audio/clips.js';
 import { seededRng, withMastered } from '../helpers.js';
 
@@ -45,7 +45,7 @@ describe('buildTask', () => {
     expect(task.choices).toHaveLength(3);
     expect(new Set(task.choices.map((c) => c.id)).size).toBe(3);
     expect(task.choices.filter((c) => c.correct).map((c) => c.id)).toEqual(['s']);
-    task.choices.forEach((c) => expect(['s', 'a', 't', 'p', 'i', 'n']).toContain(c.id));
+    task.choices.forEach((c) => expect(LETTER_ORDER).toContain(c.id));
   });
 
   it.each([1, 2, 3, 4, 5, 6])('picture distractors (seed %i) are distinct', (seed) => {
@@ -74,7 +74,7 @@ describe('buildTask', () => {
     expect(buildTask('ls:s', { progress: fresh, rng: seededRng(1) }).cheer).toMatch(/assets\/audio\/prompt\/great_job_\d\.mp3/);
   });
 
-  it.each(['zzz:1', 'fs:i', 'fs:q', 'rhyme:99', 'blend:dog', 'ls:z', 'name'])('throws for unknown item %s', (id) => {
+  it.each(['zzz:1', 'fs:i', 'fs:q', 'rhyme:99', 'blend:cat', 'ls:z', 'name'])('throws for unknown item %s', (id) => {
     expect(() => buildTask(id, { progress: fresh, rng: seededRng(1) })).toThrow();
   });
 });

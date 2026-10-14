@@ -9,6 +9,10 @@ const PHONEMES = [
   { id: 'p', label: 'p', example: 'pig', tip: 'A quick, whispered lip pop: "p". No "puh" — no voice after it.' },
   { id: 'i', label: 'i', example: 'itchy', tip: 'Short i, as at the start of "itchy". Not the letter name "eye".' },
   { id: 'n', label: 'n', example: 'nest', tip: 'Hum through your nose, about one second: "nnnnn". No "nuh".' },
+  { id: 'm', label: 'm', example: 'moon', tip: 'Lips closed, hum about one second: "mmmmm". No "muh".' },
+  { id: 'd', label: 'd', example: 'dog', tip: 'A short, light "d" with the tongue. Keep it clipped — no "duh".' },
+  { id: 'g', label: 'g', example: 'goat', tip: 'A short, light "g" from the back of the throat, as in "goat". No "guh".' },
+  { id: 'o', label: 'o', example: 'octopus', tip: 'Short o, as at the start of "octopus". Not the letter name "oh".' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';

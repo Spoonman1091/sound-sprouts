@@ -8,5 +8,7 @@ export const IMAGE_CODEPOINTS = Object.freeze({
   cake: '1F382', snake: '1F40D', mouse: '1F42D', house: '1F3E0', goat: '1F410', boat: '26F5',
   fox: '1F98A', box: '1F4E6', frog: '1F438', log: '1FAB5', moon: '1F319', spoon: '1F944',
   pin: '1F4CC', tap: '1F6B0', pan: '1F373', tin: '1F96B', sip: '1F964', nap: '1F634',
+  dog: '1F415', duck: '1F986', gift: '1F381', octopus: '1F419', otter: '1F9A6',
+  map: '1F5FA', sad: '1F622', man: '1F468',
   seedling: '1F331', tulip: '1F337', wilted_flower: '1F940',
 });
