@@ -94,6 +94,8 @@ describe('runSession', () => {
     expect(stageClasses).toEqual(['activity leaving']);
     expect(seenDeps[0].settleMs).toBe(CONFIG.SETTLE_MS);
     expect(CONFIG.SETTLE_MS).toBeGreaterThanOrEqual(400);
+    expect(seenDeps[0].narrateGapMs).toBe(CONFIG.NARRATION_GAP_MS);
+    expect(CONFIG.NARRATION_GAP_MS).toBeGreaterThanOrEqual(500);
   });
 });
 

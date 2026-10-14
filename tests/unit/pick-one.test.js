@@ -173,6 +173,20 @@ describe('runPickOne', () => {
       expect(player.playSequence.mock.invocationCallOrder[0]).toBeLessThan(player.play.mock.invocationCallOrder[0]);
     });
 
+    it('pauses before the first picture and lingers on each one after its word', async () => {
+      const root = document.createElement('div');
+      const events = [];
+      const lit = () => [...root.querySelectorAll('.choice.narrating')].map((b) => b.dataset.choiceId).join(',');
+      const player = fakePlayer({
+        playSequence: vi.fn(async () => { events.push('question'); return { ok: true }; }),
+        play: vi.fn(async (clip) => { events.push(`say ${clip}`); return { ok: true }; }),
+      });
+      const wait = vi.fn(async (ms) => { events.push(`wait ${ms} [${lit()}]`); });
+      runPickOne(root, narrated, { player, wait, narrateGapMs: 700 });
+      await flush();
+      expect(events).toEqual(['question', 'wait 700 []', 'say sun.mp3', 'wait 700 [sun]', 'say pig.mp3', 'wait 700 [pig]']);
+    });
+
     it('ignores taps until every picture has been named', async () => {
       const root = document.createElement('div');
       const gate = deferred();

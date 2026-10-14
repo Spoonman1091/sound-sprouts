@@ -1,6 +1,6 @@
 import { el } from '../ui/dom.js';
 import { prompt } from '../audio/clips.js';
-import { settle } from './settle.js';
+import { settle, pause } from './settle.js';
 
 function choiceFace(choice) {
   return choice.img
@@ -24,20 +24,23 @@ function renderPickOne(task) {
 }
 
 export function runPickOne(container, task, deps) {
-  const { player } = deps;
+  const { player, wait = pause, narrateGapMs = 0 } = deps;
+  const gap = () => (narrateGapMs > 0 ? wait(narrateGapMs) : Promise.resolve());
   return new Promise((resolve) => {
     const { root, replay, buttons, focus } = renderPickOne(task);
     let ready = false;
     let firstTry = true;
     const setReady = (value) => { ready = value; root.dataset.ready = String(value); };
 
-    // Light up each picture still in play while its word is said, so she knows what every option is.
+    // Light up each choice still in play while it is named, lingering a moment on each so she can take it in.
     const narrate = async () => {
       const remaining = buttons.filter((button) => !button.disabled);
+      await gap();
       for (const button of remaining) {
         button.classList.add('narrating');
         const choice = task.choices[buttons.indexOf(button)];
         for (const clip of choice.narration ?? [choice.audio]) await player.play(clip);
+        await gap();
         button.classList.remove('narrating');
       }
     };
