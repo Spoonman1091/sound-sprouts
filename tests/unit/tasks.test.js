@@ -23,11 +23,8 @@ describe('buildTask', () => {
     task.choices.filter((c) => !c.correct).forEach((c) => expect(RHYME_SETS[0]).not.toContain(c.id));
   });
 
-  it('pauses after "Which one rhymes with..." but not after other lead-ins', () => {
-    const pauses = (id) => buildTask(id, { progress: fresh, rng: seededRng(1) }).pauseAfterLeadIn;
-    expect(pauses('rhyme:0')).toBe(true);
-    expect(pauses('fs:s')).toBeFalsy();
-    expect(pauses('ls:s')).toBeFalsy();
+  it.each(['rhyme:0', 'fs:s', 'ls:s', 'sight:the'])('%s asks a lead-in followed by one word or sound', (id) => {
+    expect(buildTask(id, { progress: fresh, rng: seededRng(1) }).prompt).toHaveLength(2);
   });
 
   it('narrates the choices for rhyme, first-sound and letter questions, but not blends', () => {

@@ -46,9 +46,9 @@ export function runPickOne(container, task, deps) {
       }
     };
 
-    // "Which one rhymes with... [pause] cat", so the word stands out from the lead-in.
+    // "Which one rhymes with... [pause] cat", so the word or sound stands out from the lead-in.
     const playQuestion = async () => {
-      if (!task.pauseAfterLeadIn) return player.playSequence(task.prompt);
+      if (task.prompt.length < 2) return player.playSequence(task.prompt);
       const [leadIn, ...rest] = task.prompt;
       await player.playSequence([leadIn]);
       await hold(leadInGapMs);

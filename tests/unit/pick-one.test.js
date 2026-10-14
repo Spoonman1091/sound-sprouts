@@ -12,6 +12,9 @@ const task = {
   ],
 };
 const choice = (root, id) => root.querySelector(`[data-choice-id="${id}"]`);
+// The question plays as the lead-in, then (after a pause) the word or sound.
+const questionClips = (player) => player.playSequence.mock.calls.flat(2);
+const ASKED_ONCE = ['p1.mp3', 'p2.mp3'];
 
 describe('runPickOne', () => {
   it('renders choices and plays the prompt', async () => {
@@ -21,7 +24,7 @@ describe('runPickOne', () => {
     expect(root.querySelectorAll('.choice')).toHaveLength(2);
     expect(choice(root, 'sun').dataset.correct).toBe('true');
     await flush();
-    expect(player.playSequence).toHaveBeenCalledWith(['p1.mp3', 'p2.mp3']);
+    expect(questionClips(player)).toEqual(ASKED_ONCE);
   });
 
   it('ignores taps while the prompt is playing', async () => {
@@ -62,7 +65,7 @@ describe('runPickOne', () => {
     expect(choice(root, 'pig').classList.contains('wrong')).toBe(true);
     expect(player.play).toHaveBeenCalledWith('pig.mp3');
     expect(player.play).toHaveBeenCalledWith(prompt('try_again'));
-    expect(player.playSequence).toHaveBeenCalledTimes(2);
+    expect(questionClips(player)).toEqual([...ASKED_ONCE, ...ASKED_ONCE]);
     choice(root, 'sun').click();
     await expect(result).resolves.toEqual({ firstTry: false });
   });
@@ -97,7 +100,7 @@ describe('runPickOne', () => {
     expect(root.querySelector('.focus')).not.toBeNull();
     root.querySelector('.replay').click();
     await flush();
-    expect(player.playSequence).toHaveBeenCalledTimes(2);
+    expect(questionClips(player)).toEqual([...ASKED_ONCE, ...ASKED_ONCE]);
   });
 
   it('shows letters as text when choices have no image', async () => {
@@ -120,7 +123,7 @@ describe('runPickOne', () => {
     expect(player.play).not.toHaveBeenCalled();
     gate.resolve();
     await flush();
-    expect(player.playSequence).toHaveBeenCalledOnce();
+    expect(questionClips(player)).toEqual(ASKED_ONCE);
   });
 
   it('says the picture word before cheering on a correct tap', async () => {
@@ -178,13 +181,13 @@ describe('runPickOne', () => {
       const events = [];
       const lit = () => [...root.querySelectorAll('.choice.narrating')].map((b) => b.dataset.choiceId).join(',');
       const player = fakePlayer({
-        playSequence: vi.fn(async () => { events.push('question'); return { ok: true }; }),
+        playSequence: vi.fn(async (clips) => { events.push(clips.join('+')); return { ok: true }; }),
         play: vi.fn(async (clip) => { events.push(`say ${clip}`); return { ok: true }; }),
       });
       const wait = vi.fn(async (ms) => { events.push(`wait ${ms} [${lit()}]`); });
       runPickOne(root, narrated, { player, wait, questionGapMs: 1500, narrateGapMs: 700 });
       await flush();
-      expect(events).toEqual(['question', 'wait 1500 []', 'say sun.mp3', 'wait 700 [sun]', 'say pig.mp3', 'wait 700 [pig]']);
+      expect(events).toEqual(['p1.mp3', 'p2.mp3', 'wait 1500 []', 'say sun.mp3', 'wait 700 [sun]', 'say pig.mp3', 'wait 700 [pig]']);
     });
 
     it('ignores taps until every picture has been named', async () => {
@@ -238,23 +241,23 @@ describe('runPickOne', () => {
     });
   });
 
-  it('pauses between the lead-in and the rest of the question when the task asks for it', async () => {
+  it('pauses between the lead-in and the word or sound that follows', async () => {
     const root = document.createElement('div');
     const events = [];
     const player = fakePlayer({ playSequence: vi.fn(async (clips) => { events.push(clips.join('+')); return { ok: true }; }) });
     const wait = vi.fn(async (ms) => { events.push(`wait ${ms}`); });
-    runPickOne(root, { ...task, pauseAfterLeadIn: true }, { player, wait, leadInGapMs: 700 });
+    runPickOne(root, task, { player, wait, leadInGapMs: 700 });
     await flush();
     expect(events).toEqual(['p1.mp3', 'wait 700', 'p2.mp3']);
   });
 
-  it('plays the question in one go when the task does not ask for a pause', async () => {
+  it('plays a one-clip question without a pause', async () => {
     const root = document.createElement('div');
     const player = fakePlayer();
     const wait = vi.fn(async () => {});
-    runPickOne(root, task, { player, wait, leadInGapMs: 700 });
+    runPickOne(root, { ...task, prompt: ['which_picture.mp3'] }, { player, wait, leadInGapMs: 700 });
     await flush();
-    expect(player.playSequence).toHaveBeenCalledWith(['p1.mp3', 'p2.mp3']);
+    expect(player.playSequence).toHaveBeenCalledWith(['which_picture.mp3']);
     expect(wait).not.toHaveBeenCalled();
   });
 });

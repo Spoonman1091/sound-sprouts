@@ -25,7 +25,6 @@ function rhymeTask(index, rng) {
     focusAudio: word(target),
     focusLabel: target,
     narrate: true,
-    pauseAfterLeadIn: true,
     prompt: [prompt('which_rhymes_with'), word(target)],
     choices: shuffle([pictureChoice(pick(rhymes, rng), true), ...pictureDistractors(others, rng)], rng),
   };
