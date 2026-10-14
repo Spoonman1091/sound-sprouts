@@ -2,8 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS, soundsAlike } from '../../src/curriculum/units.js';
 
 describe('curriculum data', () => {
-  it('teaches s a t p, i n m d, g o c k, e u in order', () => {
-    expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u']);
+  it('teaches s a t p, i n m d, g o c k, e u h r, f b in order', () => {
+    expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b']);
+    ['h', 'r', 'f', 'b'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
+    expect(BLEND_WORDS).toEqual(expect.arrayContaining(['hat', 'bag', 'bed', 'bus', 'bug']));
+    expect(BLEND_WORDS).not.toContain('rat');
     ['c', 'k', 'e'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
     expect(FIRST_SOUND_WORDS.u).toEqual(['umbrella']);
     expect(BLEND_WORDS).toEqual(expect.arrayContaining(['cat', 'cap', 'pen', 'ten', 'sun', 'nut', 'cup']));

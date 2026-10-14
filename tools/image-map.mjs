@@ -11,6 +11,8 @@ export const IMAGE_CODEPOINTS = Object.freeze({
   dog: '1F415', duck: '1F986', gift: '1F381', octopus: '1F419', otter: '1F9A6',
   map: '1F5FA', sad: '1F622', man: '1F468',
   kite: '1FA81', key: '1F511', egg: '1F95A', elephant: '1F418', umbrella: '2602',
+  horse: '1F40E', rabbit: '1F407', rainbow: '1F308', fish: '1F41F', ball: '26BD',
+  bag: '1F45C', bed: '1F6CF', bus: '1F68C', bug: '1FAB2',
   cap: '1F9E2', pen: '1F58A', ten: '1F51F', nut: '1F95C', cup: '2615',
   seedling: '1F331', tulip: '1F337', wilted_flower: '1F940',
 });

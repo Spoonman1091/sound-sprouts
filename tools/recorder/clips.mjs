@@ -16,6 +16,10 @@ const PHONEMES = [
   { id: 'c', label: 'c / k', example: 'cat, kite', tip: 'A quick, whispered "k" sound — no "kuh". This one recording is used for both c and k.' },
   { id: 'e', label: 'e', example: 'egg', tip: 'Short e, as at the start of "egg". Not the letter name "ee".' },
   { id: 'u', label: 'u', example: 'umbrella', tip: 'Short u, as at the start of "umbrella". Not the letter name "you".' },
+  { id: 'h', label: 'h', example: 'horse', tip: 'Just a breath out, like fogging a window — no "huh".' },
+  { id: 'r', label: 'r', example: 'rabbit', tip: 'A growly "rrr", held for about a second — no "ruh".' },
+  { id: 'f', label: 'f', example: 'fish', tip: 'Top teeth on your lip and hold "fff" for about a second — no "fuh".' },
+  { id: 'b', label: 'b', example: 'ball', tip: 'Short and bouncy, lips popping apart — keep the "uh" as tiny as you can.' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';
