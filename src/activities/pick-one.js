@@ -24,23 +24,24 @@ function renderPickOne(task) {
 }
 
 export function runPickOne(container, task, deps) {
-  const { player, wait = pause, narrateGapMs = 0 } = deps;
-  const gap = () => (narrateGapMs > 0 ? wait(narrateGapMs) : Promise.resolve());
+  const { player, wait = pause, questionGapMs = 0, narrateGapMs = 0 } = deps;
+  const hold = (ms) => (ms > 0 ? wait(ms) : Promise.resolve());
   return new Promise((resolve) => {
     const { root, replay, buttons, focus } = renderPickOne(task);
     let ready = false;
     let firstTry = true;
     const setReady = (value) => { ready = value; root.dataset.ready = String(value); };
 
-    // Light up each choice still in play while it is named, lingering a moment on each so she can take it in.
+    // After a pause to let the question sink in, light up each choice still in play while it is named,
+    // lingering a moment on each so she can take it in.
     const narrate = async () => {
       const remaining = buttons.filter((button) => !button.disabled);
-      await gap();
+      await hold(questionGapMs);
       for (const button of remaining) {
         button.classList.add('narrating');
         const choice = task.choices[buttons.indexOf(button)];
         for (const clip of choice.narration ?? [choice.audio]) await player.play(clip);
-        await gap();
+        await hold(narrateGapMs);
         button.classList.remove('narrating');
       }
     };

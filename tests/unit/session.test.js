@@ -96,6 +96,8 @@ describe('runSession', () => {
     expect(CONFIG.SETTLE_MS).toBeGreaterThanOrEqual(400);
     expect(seenDeps[0].narrateGapMs).toBe(CONFIG.NARRATION_GAP_MS);
     expect(CONFIG.NARRATION_GAP_MS).toBeGreaterThanOrEqual(500);
+    expect(seenDeps[0].questionGapMs).toBe(CONFIG.QUESTION_GAP_MS);
+    expect(CONFIG.QUESTION_GAP_MS).toBeGreaterThan(CONFIG.NARRATION_GAP_MS);
   });
 });
 
