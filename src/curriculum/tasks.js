@@ -1,0 +1,71 @@
+import { CONFIG } from '../config.js';
+import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, CHEERS } from './units.js';
+import { shuffle, pick } from './random.js';
+import { unlockedLetters } from './unlock.js';
+import { phoneme, word, prompt, imgPath } from '../audio/clips.js';
+import { nameLetters } from '../state/name.js';
+
+const pictureChoice = (w, correct) => ({ id: w, label: w, img: imgPath(w), audio: word(w), correct });
+const letterChoice = (l, correct) => ({ id: l, label: l, audio: phoneme(l), correct });
+
+function assertKnown(condition, itemId) {
+  if (!condition) throw new Error(`Unknown item id: ${itemId}`);
+}
+
+function rhymeTask(index, rng) {
+  const [target, ...rhymes] = RHYME_SETS[index];
+  const others = RHYME_SETS.filter((_, i) => i !== index).flat();
+  return {
+    activity: 'pickOne',
+    focusImg: imgPath(target),
+    prompt: [prompt('which_rhymes_with'), word(target)],
+    choices: shuffle([pictureChoice(pick(rhymes, rng), true), pictureChoice(pick(others, rng), false)], rng),
+  };
+}
+
+function firstSoundTask(letter, rng) {
+  const others = Object.entries(FIRST_SOUND_WORDS).filter(([l]) => l !== letter).flatMap(([, ws]) => ws);
+  return {
+    activity: 'pickOne',
+    prompt: [prompt('which_starts_with'), phoneme(letter)],
+    choices: shuffle([pictureChoice(pick(FIRST_SOUND_WORDS[letter], rng), true), pictureChoice(pick(others, rng), false)], rng),
+  };
+}
+
+function letterSoundTask(letter, progress, rng) {
+  const pool = unlockedLetters(progress).filter((l) => l !== letter);
+  const distractors = shuffle(pool, rng).slice(0, CONFIG.LETTER_CHOICES - 1);
+  return {
+    activity: 'pickOne',
+    prompt: [prompt('find_the_letter'), phoneme(letter)],
+    choices: shuffle([letterChoice(letter, true), ...distractors.map((l) => letterChoice(l, false))], rng),
+  };
+}
+
+function blendTask(w, rng) {
+  const other = pick(BLEND_WORDS.filter((x) => x !== w), rng);
+  return { activity: 'blend', word: w, letters: [...w], choices: shuffle([pictureChoice(w, true), pictureChoice(other, false)], rng) };
+}
+
+function nameTask(progress, rng) {
+  const letters = nameLetters(progress.childName);
+  return {
+    activity: 'nameSpell',
+    name: progress.childName.trim().split(/\s+/)[0],
+    letters,
+    tileOrder: shuffle(letters.map((_, i) => i), rng),
+  };
+}
+
+export function buildTask(itemId, { progress, rng = Math.random }) {
+  const [kind, arg] = itemId.split(':');
+  const builders = {
+    rhyme: () => { assertKnown(RHYME_SETS[Number(arg)], itemId); return rhymeTask(Number(arg), rng); },
+    fs: () => { assertKnown(FIRST_SOUND_WORDS[arg], itemId); return firstSoundTask(arg, rng); },
+    ls: () => { assertKnown(LETTER_ORDER.includes(arg), itemId); return letterSoundTask(arg, progress, rng); },
+    blend: () => { assertKnown(BLEND_WORDS.includes(arg), itemId); return blendTask(arg, rng); },
+    name: () => { assertKnown(nameLetters(progress.childName).length > 0, itemId); return nameTask(progress, rng); },
+  };
+  assertKnown(builders[kind], itemId);
+  return { itemId, cheer: prompt(pick(CHEERS, rng)), ...builders[kind]() };
+}

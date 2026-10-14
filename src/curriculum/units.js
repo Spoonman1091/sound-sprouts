@@ -1,0 +1,32 @@
+// Letter order follows common synthetic-phonics programmes: s a t p i n first.
+export const LETTER_ORDER = Object.freeze(['s', 'a', 't', 'p', 'i', 'n']);
+
+// No reliable picturable short-/i/ word exists in OpenMoji, so 'i' has no first-sound item.
+export const FIRST_SOUND_WORDS = Object.freeze({
+  s: ['sun', 'sock'],
+  a: ['apple', 'ant'],
+  t: ['tent', 'tiger'],
+  p: ['pig', 'pizza'],
+  n: ['nest', 'nose'],
+});
+
+// First word is the target; the rest rhyme with it.
+export const RHYME_SETS = Object.freeze([
+  ['cat', 'hat', 'bat'],
+  ['car', 'star'],
+  ['bee', 'tree'],
+  ['cake', 'snake'],
+  ['mouse', 'house'],
+  ['goat', 'boat'],
+  ['fox', 'box'],
+  ['frog', 'log'],
+  ['moon', 'spoon'],
+]);
+
+export const BLEND_WORDS = Object.freeze(['pin', 'tap', 'pan', 'tin', 'sip', 'nap']);
+
+export const PICTURE_WORDS = Object.freeze([
+  ...new Set([...Object.values(FIRST_SOUND_WORDS).flat(), ...RHYME_SETS.flat(), ...BLEND_WORDS]),
+]);
+
+export const CHEERS = Object.freeze(['great_job_1', 'great_job_2', 'great_job_3']);

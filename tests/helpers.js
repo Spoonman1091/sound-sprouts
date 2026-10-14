@@ -28,3 +28,14 @@ export function deferred() {
   const promise = new Promise((r) => { resolve = r; });
   return { promise, resolve };
 }
+
+import { createProgress, recordAttempt } from '../src/state/progress.js';
+
+// Master each id with 3 first-try successes across sessions m1..m3 (at = 1..3).
+export function withMastered(progress = createProgress(), ids = []) {
+  return ids.reduce(
+    (p, itemId) => [1, 2, 3].reduce(
+      (acc, n) => recordAttempt(acc, { itemId, firstTry: true, sessionId: `m${n}`, at: n }), p),
+    progress,
+  );
+}
