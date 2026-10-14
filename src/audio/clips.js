@@ -1,7 +1,7 @@
 export const PROMPT_IDS = Object.freeze([
   'which_starts_with', 'which_rhymes_with', 'find_the_letter', 'tap_each_letter',
   'which_picture', 'spell_your_name', 'great_job_1', 'great_job_2', 'great_job_3',
-  'try_again', 'all_done', 'new_flower', 'lets_play',
+  'try_again', 'all_done', 'new_flower', 'lets_play', 'find_the_word',
 ]);
 
 import { PHONEME_SOURCE } from '../curriculum/units.js';

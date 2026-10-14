@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createProgress, setChildName } from '../../src/state/progress.js';
 import { buildTask } from '../../src/curriculum/tasks.js';
-import { RHYME_SETS, FIRST_SOUND_WORDS, BLEND_WORDS, LETTER_ORDER } from '../../src/curriculum/units.js';
+import { RHYME_SETS, FIRST_SOUND_WORDS, BLEND_WORDS, LETTER_ORDER, SIGHT_WORDS } from '../../src/curriculum/units.js';
 import { prompt, phoneme, word, letterName } from '../../src/audio/clips.js';
 import { seededRng, withMastered } from '../helpers.js';
 
@@ -131,7 +131,22 @@ describe('buildTask', () => {
     expect(buildTask('ls:s', { progress: fresh, rng: seededRng(1) }).cheer).toMatch(/assets\/audio\/prompt\/great_job_\d\.mp3/);
   });
 
-  it.each(['zzz:1', 'fs:i', 'fs:x', 'fs:ng', 'fs:ck', 'rhyme:99', 'blend:zap', 'ls:1', 'name'])('throws for unknown item %s', (id) => {
+  it.each(['zzz:1', 'fs:i', 'fs:x', 'fs:ng', 'fs:ck', 'rhyme:99', 'blend:zap', 'ls:1', 'sight:was', 'name'])('throws for unknown item %s', (id) => {
     expect(() => buildTask(id, { progress: fresh, rng: seededRng(1) })).toThrow();
+  });
+
+  it.each(Object.keys(SIGHT_WORDS))('sight word task for "%s" asks to find the spoken word among three written words', (id) => {
+    const task = buildTask(`sight:${id}`, { progress: fresh, rng: seededRng(4) });
+    expect(task.activity).toBe('pickOne');
+    expect(task.prompt).toEqual([prompt('find_the_word'), word(id)]);
+    expect(task.narrate).toBeFalsy();
+    expect(task.choices).toHaveLength(3);
+    expect(new Set(task.choices.map((c) => c.id)).size).toBe(3);
+    task.choices.forEach((c) => {
+      expect(c.label).toBe(SIGHT_WORDS[c.id]);
+      expect(c.audio).toBe(word(c.id));
+      expect(c.img).toBeUndefined();
+    });
+    expect(task.choices.filter((c) => c.correct).map((c) => c.id)).toEqual([id]);
   });
 });

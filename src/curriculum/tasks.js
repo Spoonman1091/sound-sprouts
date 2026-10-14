@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, CHEERS, soundsAlike, graphemes } from './units.js';
+import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, CHEERS, SIGHT_WORDS, soundsAlike, graphemes } from './units.js';
 import { shuffle, pick } from './random.js';
 import { unlockedLetters } from './unlock.js';
 import { phoneme, word, prompt, imgPath, letterName } from '../audio/clips.js';
@@ -62,6 +62,17 @@ function blendTask(w, rng) {
   return { activity: 'blend', word: w, letters: graphemes(w), choices: shuffle([pictureChoice(w, true), ...pictureDistractors(others, rng)], rng) };
 }
 
+// Not narrated: saying each word would give the answer away.
+function sightWordTask(id, rng) {
+  const wordChoice = (w, correct) => ({ id: w, label: SIGHT_WORDS[w], audio: word(w), correct });
+  const others = distinct(Object.keys(SIGHT_WORDS).filter((w) => w !== id), CONFIG.LETTER_CHOICES - 1, rng);
+  return {
+    activity: 'pickOne',
+    prompt: [prompt('find_the_word'), word(id)],
+    choices: shuffle([wordChoice(id, true), ...others.map((w) => wordChoice(w, false))], rng),
+  };
+}
+
 function nameTask(progress, rng) {
   const letters = nameLetters(progress.childName);
   return {
@@ -79,6 +90,7 @@ export function buildTask(itemId, { progress, rng = Math.random }) {
     fs: () => { assertKnown(FIRST_SOUND_WORDS[arg], itemId); return firstSoundTask(arg, rng); },
     ls: () => { assertKnown(LETTER_ORDER.includes(arg), itemId); return letterSoundTask(arg, progress, rng); },
     blend: () => { assertKnown(BLEND_WORDS.includes(arg), itemId); return blendTask(arg, rng); },
+    sight: () => { assertKnown(SIGHT_WORDS[arg], itemId); return sightWordTask(arg, rng); },
     name: () => { assertKnown(nameLetters(progress.childName).length > 0, itemId); return nameTask(progress, rng); },
   };
   assertKnown(builders[kind], itemId);

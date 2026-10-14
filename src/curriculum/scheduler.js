@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { RHYME_SETS, FIRST_SOUND_WORDS } from './units.js';
+import { LETTER_ORDER, RHYME_SETS, FIRST_SOUND_WORDS, SIGHT_WORDS } from './units.js';
 import { readyBlends } from './blends.js';
 import { unlockedLetters } from './unlock.js';
 import { shuffle } from './random.js';
@@ -14,7 +14,9 @@ export function availableItems(progress) {
   const letterItems = letters.flatMap((l) => (FIRST_SOUND_WORDS[l] ? [`ls:${l}`, `fs:${l}`] : [`ls:${l}`]));
   const blendItems = readyBlends(progress, masteredLetters).map((w) => `blend:${w}`);
   const nameItems = nameLetters(progress.childName).length > 0 ? ['name'] : [];
-  return [...nameItems, ...RHYME_SETS.map((_, i) => `rhyme:${i}`), ...letterItems, ...blendItems];
+  const sightReady = LETTER_ORDER.slice(0, CONFIG.SIGHT_WORDS_AFTER_LETTERS).every((l) => masteredLetters.includes(l));
+  const sightItems = sightReady ? Object.keys(SIGHT_WORDS).map((w) => `sight:${w}`) : [];
+  return [...nameItems, ...RHYME_SETS.map((_, i) => `rhyme:${i}`), ...letterItems, ...blendItems, ...sightItems];
 }
 
 export function sortForReview(progress, ids) {

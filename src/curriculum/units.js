@@ -65,6 +65,9 @@ export const RHYME_SETS = Object.freeze([
   ['moon', 'spoon'],
 ]);
 
+// Sight words can't be sounded out yet, so they are learned by sight: id -> how the word is written.
+export const SIGHT_WORDS = Object.freeze({ the: 'the', i: 'I', a: 'a', is: 'is' });
+
 // More than three sounds, e.g. f-r-o-g.
 export const isLongWord = (w) => graphemes(w).length > 3;
 

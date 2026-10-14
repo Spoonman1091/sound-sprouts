@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS, soundsAlike, graphemes, isLongWord } from '../../src/curriculum/units.js';
+import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS, soundsAlike, graphemes, isLongWord, SIGHT_WORDS } from '../../src/curriculum/units.js';
 
 describe('curriculum data', () => {
   it('teaches s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q in order', () => {
@@ -85,5 +85,9 @@ describe('curriculum data', () => {
     ['c', 'k', 'q'].forEach((l) => expect(soundsAlike('ck', l)).toBe(true));
     expect(soundsAlike('sh', 's')).toBe(false);
     expect(soundsAlike('ch', 'c')).toBe(false);
+  });
+
+  it('has the first sight words, shown as they are written', () => {
+    expect(SIGHT_WORDS).toEqual({ the: 'the', i: 'I', a: 'a', is: 'is' });
   });
 });

@@ -1,9 +1,9 @@
 import { el } from '../ui/dom.js';
 import { CONFIG } from '../config.js';
-import { LETTER_ORDER, RHYME_SETS } from '../curriculum/units.js';
+import { LETTER_ORDER, RHYME_SETS, SIGHT_WORDS } from '../curriculum/units.js';
 import { letterStatus } from '../curriculum/unlock.js';
 import { validateChildName } from '../state/name.js';
-import { STATUS_LABELS, firstTryRate, practiceList, sessionsInLastDays, rhymesMastered } from './report.js';
+import { STATUS_LABELS, firstTryRate, practiceList, sessionsInLastDays, rhymesMastered, sightWordsMastered } from './report.js';
 
 const STORAGE_NOTICES = Object.freeze({
   reset: "Saved progress couldn't be read, so Sound Sprouts started fresh.",
@@ -63,7 +63,7 @@ export function renderDashboard(container, { state, now = Date.now, confirmFn = 
     lettersSection(progress),
     el('section', {}, [
       el('h2', {}, ['This week']),
-      el('p', {}, [`${sessionsInLastDays(progress, 7, now())} sessions in the last 7 days · ${rhymesMastered(progress)} of ${RHYME_SETS.length} rhyme sets mastered`]),
+      el('p', {}, [`${sessionsInLastDays(progress, 7, now())} sessions in the last 7 days · ${rhymesMastered(progress)} of ${RHYME_SETS.length} rhyme sets mastered · ${sightWordsMastered(progress)} of ${Object.keys(SIGHT_WORDS).length} sight words mastered`]),
       el('h2', {}, ['Needs practice']),
       el('p', {}, [practice.length ? practice.join(' · ') : 'Nothing right now. Great going!']),
     ]),

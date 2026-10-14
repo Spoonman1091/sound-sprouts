@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { PROMPT_IDS, prompt, phoneme, letterName, word, imgPath } from '../../src/audio/clips.js';
-import { LETTER_ORDER, PICTURE_WORDS } from '../../src/curriculum/units.js';
+import { LETTER_ORDER, PICTURE_WORDS, SIGHT_WORDS } from '../../src/curriculum/units.js';
 import { PROMPT_TEXT, LETTER_NAME_TEXT } from '../../tools/audio-script.mjs';
 import { IMAGE_CODEPOINTS, GARDEN_IMAGES } from '../../tools/image-map.mjs';
 
@@ -24,6 +24,7 @@ describe('content assets', () => {
       ...LETTER_ORDER.map(phoneme),
       ...ALPHABET.map(letterName),
       ...PICTURE_WORDS.map(word),
+      ...Object.keys(SIGHT_WORDS).map(word),
     ])).toEqual([]);
   });
 
@@ -43,7 +44,7 @@ describe('content assets', () => {
   it('credits generated speech only while some clips are still generated', () => {
     const credits = readFileSync('credits.html', 'utf8');
     const recorded = JSON.parse(readFileSync('tools/recorder/recorded.json', 'utf8'));
-    const total = new Set(LETTER_ORDER.map(phoneme)).size + PROMPT_IDS.length + PICTURE_WORDS.length + ALPHABET.length;
+    const total = new Set(LETTER_ORDER.map(phoneme)).size + PROMPT_IDS.length + PICTURE_WORDS.length + Object.keys(SIGHT_WORDS).length + ALPHABET.length;
     expect(credits.includes('Piper')).toBe(recorded.length < total);
   });
 });

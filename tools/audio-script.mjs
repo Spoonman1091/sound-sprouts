@@ -14,6 +14,7 @@ export const PROMPT_TEXT = Object.freeze({
   all_done: 'All done for today! Look how your garden grows.',
   new_flower: 'Wow! A new flower bloomed!',
   lets_play: "Let's play!",
+  find_the_word: 'Find the word...',
 });
 
 // Spelled phonetically because TTS often reads a bare "a" as "uh".
@@ -23,4 +24,9 @@ export const LETTER_NAME_TEXT = Object.freeze({
   s: 'Ess.', t: 'Tee.', u: 'You.', v: 'Vee.', w: 'Double you.', x: 'Ex.', y: 'Why.', z: 'Zee.',
 });
 
-export const WORD_TEXT = Object.freeze(Object.fromEntries(PICTURE_WORDS.map((w) => [w, `${w}.`])));
+// Sight words are spelled for the TTS fallback so "a" comes out as "uh".
+const SIGHT_WORD_TEXT = Object.freeze({ the: 'the.', i: 'I.', a: 'uh.', is: 'is.' });
+export const WORD_TEXT = Object.freeze({
+  ...Object.fromEntries(PICTURE_WORDS.map((w) => [w, `${w}.`])),
+  ...SIGHT_WORD_TEXT,
+});

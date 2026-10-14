@@ -70,4 +70,9 @@ describe('renderDashboard', () => {
     expect(h.onPrint).toHaveBeenCalledOnce();
     expect(h.onDone).toHaveBeenCalledOnce();
   });
+
+  it('reports how many sight words are mastered', () => {
+    const { root } = render({ progress: withMastered(undefined, ['sight:the']) });
+    expect(root.textContent).toContain('1 of 4 sight words mastered');
+  });
 });

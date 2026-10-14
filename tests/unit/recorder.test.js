@@ -5,7 +5,7 @@ import { createRecorderServer, MAX_UPLOAD_BYTES } from '../../tools/recorder/ser
 import { RECORDING_GROUPS, RECORDING_CLIPS, findClip } from '../../tools/recorder/clips.mjs';
 import { selectJobs } from '../../tools/build-audio.mjs';
 import { PROMPT_IDS } from '../../src/audio/clips.js';
-import { PICTURE_WORDS } from '../../src/curriculum/units.js';
+import { PICTURE_WORDS, SIGHT_WORDS } from '../../src/curriculum/units.js';
 
 let server;
 afterEach(() => new Promise((resolve) => (server ? server.close(resolve) : resolve())));
@@ -24,12 +24,14 @@ async function start(overrides = {}) {
 }
 
 describe('recording clips', () => {
-  it('groups letter sounds, prompts, words and letter names', () => {
-    expect(RECORDING_GROUPS.map((g) => g.kind)).toEqual(['phoneme', 'prompt', 'word', 'letter']);
+  it('groups letter sounds, prompts, sight words, picture words and letter names', () => {
+    expect(RECORDING_GROUPS.map((g) => g.kind)).toEqual(['phoneme', 'prompt', 'word', 'word', 'letter']);
+    expect(RECORDING_GROUPS[2]).toMatchObject({ title: 'Sight words', optional: false });
+    expect(RECORDING_GROUPS[2].clips.map((c) => c.label)).toEqual(['the', 'I', 'a', 'is']);
     const ids = (kind) => RECORDING_CLIPS.filter((c) => c.kind === kind).map((c) => c.id);
     expect(ids('phoneme')).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q', 'sh', 'ch', 'th', 'ng']);
     expect(ids('prompt').sort()).toEqual([...PROMPT_IDS].sort());
-    expect(ids('word').sort()).toEqual([...PICTURE_WORDS].sort());
+    expect(ids('word').sort()).toEqual([...PICTURE_WORDS, ...Object.keys(SIGHT_WORDS)].sort());
     expect(ids('letter')).toHaveLength(26);
   });
 

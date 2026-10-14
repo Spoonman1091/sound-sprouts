@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { RHYME_SETS } from '../curriculum/units.js';
+import { RHYME_SETS, SIGHT_WORDS } from '../curriculum/units.js';
 import { isMastered, isStruggling } from '../state/progress.js';
 
 export const STATUS_LABELS = Object.freeze({
@@ -20,6 +20,7 @@ export function describeItem(itemId) {
     blend: () => `Blending “${arg}”`,
     rhyme: () => `Rhyming: ${(RHYME_SETS[Number(arg)] ?? []).join(', ')}`,
     name: () => 'Spelling their name',
+    sight: () => `Sight word “${SIGHT_WORDS[arg] ?? arg}”`,
   };
   return labels[kind] ? labels[kind]() : itemId;
 }
@@ -32,3 +33,6 @@ export const sessionsInLastDays = (progress, days, now) =>
 
 export const rhymesMastered = (progress) =>
   RHYME_SETS.filter((_, i) => isMastered(progress, `rhyme:${i}`)).length;
+
+export const sightWordsMastered = (progress) =>
+  Object.keys(SIGHT_WORDS).filter((w) => isMastered(progress, `sight:${w}`)).length;

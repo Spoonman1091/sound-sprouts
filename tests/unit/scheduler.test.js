@@ -54,6 +54,12 @@ describe('availableItems', () => {
     expect(availableItems(withMastered(undefined, [...singles, 'ls:sh']))).toContain('blend:fish');
   });
 
+  it('adds sight words once the first letters are mastered', () => {
+    const first = LETTER_ORDER.slice(0, CONFIG.SIGHT_WORDS_AFTER_LETTERS).map((l) => `ls:${l}`);
+    expect(availableItems(withMastered(undefined, first.slice(0, -1)))).not.toContain('sight:the');
+    expect(availableItems(withMastered(undefined, first))).toEqual(expect.arrayContaining(['sight:the', 'sight:i', 'sight:a', 'sight:is']));
+  });
+
   it('has no fs:i item', () => {
     expect(availableItems(withMastered(undefined, allLetterSounds))).not.toContain('fs:i');
   });

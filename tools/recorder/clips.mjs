@@ -1,6 +1,6 @@
 // Everything a grown-up can record, grouped for the recorder page. Unrecorded clips keep the Piper voice.
 import { PROMPT_TEXT, LETTER_NAME_TEXT } from '../audio-script.mjs';
-import { PICTURE_WORDS } from '../../src/curriculum/units.js';
+import { PICTURE_WORDS, SIGHT_WORDS } from '../../src/curriculum/units.js';
 
 const PHONEMES = [
   { id: 's', label: 's', example: 'sun', tip: 'Hiss like a snake, about one second: "sssss". No "suh".' },
@@ -39,6 +39,14 @@ const PROMPT_TIPS = Object.freeze({
   which_starts_with: LEAD_IN,
   which_rhymes_with: LEAD_IN,
   find_the_letter: LEAD_IN,
+  find_the_word: LEAD_IN,
+});
+
+const SIGHT_WORD_TIPS = Object.freeze({
+  the: 'Say "the" the everyday way, as in "the cat" ("thuh").',
+  i: 'Say "I", as in "I can".',
+  a: 'Say "a" the everyday way, as in "a cat" ("uh"), not the letter name "ay".',
+  is: 'Say "is", as in "it is".',
 });
 const promptTip = (id) => PROMPT_TIPS[id] ?? 'Say it warmly and a little slowly, the way you would talk to her.';
 
@@ -47,6 +55,10 @@ export const RECORDING_GROUPS = Object.freeze([
   {
     kind: 'prompt', title: 'Instructions and praise', optional: false,
     clips: Object.entries(PROMPT_TEXT).map(([id, text]) => ({ id, label: text, tip: promptTip(id) })),
+  },
+  {
+    kind: 'word', title: 'Sight words', optional: false,
+    clips: Object.entries(SIGHT_WORDS).map(([id, text]) => ({ id, label: text, tip: SIGHT_WORD_TIPS[id] })),
   },
   {
     kind: 'word', title: 'Picture words', optional: true,

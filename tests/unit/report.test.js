@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createProgress, recordAttempt, recordSession } from '../../src/state/progress.js';
-import { firstTryRate, describeItem, practiceList, sessionsInLastDays, rhymesMastered } from '../../src/parent/report.js';
+import { firstTryRate, describeItem, practiceList, sessionsInLastDays, rhymesMastered, sightWordsMastered } from '../../src/parent/report.js';
 import { CONFIG } from '../../src/config.js';
 import { withMastered } from '../helpers.js';
 
@@ -17,6 +17,7 @@ describe('report', () => {
     ['blend:pin', 'Blending “pin”'],
     ['rhyme:0', 'Rhyming: cat, hat, bat'],
     ['name', 'Spelling their name'],
+    ['sight:i', 'Sight word “I”'],
     ['weird', 'weird'],
   ])('describeItem(%s)', (id, label) => {
     expect(describeItem(id)).toBe(label);
@@ -33,5 +34,6 @@ describe('report', () => {
       (acc, at, i) => recordSession(acc, { sessionId: `s${i}`, at, itemCount: 8 }), createProgress());
     expect(sessionsInLastDays(p, 7, now)).toBe(2);
     expect(rhymesMastered(withMastered(undefined, ['rhyme:0', 'rhyme:3']))).toBe(2);
+    expect(sightWordsMastered(withMastered(undefined, ['sight:the', 'sight:i']))).toBe(2);
   });
 });
