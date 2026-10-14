@@ -1,7 +1,7 @@
 // Letter order follows common synthetic-phonics programmes: s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q,
-// then the digraphs sh ch th ng ck (two letters, one sound), then the long-vowel teams ee oo ai.
+// then the digraphs sh ch th ng ck (two letters, one sound), then the vowel teams ee oo ai, oa ar or.
 export const LETTER_ORDER = Object.freeze(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q',
-  'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai']);
+  'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or']);
 
 const DIGRAPHS = Object.freeze(LETTER_ORDER.filter((l) => l.length === 2));
 
@@ -21,7 +21,7 @@ export const soundsAlike = (a, b) => a === b || SOUND_GROUPS.some((g) => g.inclu
 
 // No reliable picturable short-/i/ word exists in OpenMoji, so 'i' has no first-sound item.
 // No word a child knows starts with x's "ks" sound, so x is practised through blends (fox, box, six);
-// likewise ng and ck only come at the ends of words, and no picturable word starts with ee, oo or ai.
+// likewise ng and ck only come at the ends of words, and no picturable word starts with a vowel team.
 export const FIRST_SOUND_WORDS = Object.freeze({
   s: ['sun', 'sock'],
   a: ['apple', 'ant'],
@@ -78,8 +78,9 @@ export const BLEND_WORDS = Object.freeze(['pin', 'tap', 'pan', 'tin', 'sip', 'na
   'fish', 'ship', 'chick', 'duck', 'sock', 'rock', 'bath', 'ring',
   // Longer words with consonant blends.
   'frog', 'stop', 'hand', 'crab', 'drum', 'flag', 'milk', 'clock', 'plant', 'nest', 'tent', 'gift',
-  // Long-vowel teams (oo as in moon).
-  'bee', 'tree', 'sheep', 'three', 'moon', 'spoon', 'tooth', 'boot', 'broom', 'rain', 'snail', 'train', 'chain']);
+  // Vowel teams (oo as in moon).
+  'bee', 'tree', 'sheep', 'three', 'moon', 'spoon', 'tooth', 'boot', 'broom', 'rain', 'snail', 'train', 'chain',
+  'goat', 'boat', 'coat', 'soap', 'car', 'star', 'yarn', 'jar', 'arm', 'cart', 'corn', 'fork']);
 
 export const PICTURE_WORDS = Object.freeze([
   ...new Set([...Object.values(FIRST_SOUND_WORDS).flat(), ...RHYME_SETS.flat(), ...BLEND_WORDS]),

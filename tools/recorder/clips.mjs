@@ -35,6 +35,9 @@ const PHONEMES = [
   { id: 'ee', label: 'ee', example: 'bee', tip: 'A long, smiley "eee", as in "bee", held for about a second.' },
   { id: 'oo', label: 'oo', example: 'moon', tip: 'A long "ooo", as in "moon" (not the short "oo" in "book"), held for about a second.' },
   { id: 'ai', label: 'ai', example: 'rain', tip: 'A long "ay", as in "rain", held for about a second.' },
+  { id: 'oa', label: 'oa', example: 'goat', tip: 'A long "oh", as in "goat", held for about a second.' },
+  { id: 'ar', label: 'ar', example: 'car', tip: 'The "ar" in "car" — open wide, like at the doctor\'s, about a second.' },
+  { id: 'or', label: 'or', example: 'fork', tip: 'The "or" in "fork", held for about a second.' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';

@@ -4,7 +4,7 @@ import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS
 describe('curriculum data', () => {
   it('teaches s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q in order', () => {
     expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q',
-      'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai']);
+      'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or']);
     expect(LETTER_ORDER.filter((l) => l.length === 1).sort().join('')).toBe('abcdefghijklmnopqrstuvwxyz');
     ['y', 'z'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
     expect(FIRST_SOUND_WORDS.q).toEqual(['queen']);
@@ -74,12 +74,21 @@ describe('curriculum data', () => {
   });
 
   it('ends with the long-vowel teams ee oo ai, practised through blends', () => {
-    expect(LETTER_ORDER.slice(-3)).toEqual(['ee', 'oo', 'ai']);
+    expect(LETTER_ORDER.slice(31, 34)).toEqual(['ee', 'oo', 'ai']);
     ['ee', 'oo', 'ai'].forEach((v) => expect(FIRST_SOUND_WORDS[v]).toBeUndefined());
     expect(BLEND_WORDS).toEqual(expect.arrayContaining(['bee', 'tree', 'sheep', 'three', 'moon', 'spoon', 'tooth', 'boot', 'broom', 'rain', 'snail', 'train', 'chain']));
   });
 
+  it('ends with the vowel teams oa ar or, practised through blends', () => {
+    expect(LETTER_ORDER.slice(-3)).toEqual(['oa', 'ar', 'or']);
+    ['oa', 'ar', 'or'].forEach((v) => expect(FIRST_SOUND_WORDS[v]).toBeUndefined());
+    expect(BLEND_WORDS).toEqual(expect.arrayContaining(['goat', 'boat', 'coat', 'soap', 'car', 'star', 'yarn', 'jar', 'arm', 'cart', 'corn', 'fork']));
+  });
+
   it('keeps vowel teams together when splitting words', () => {
+    expect(graphemes('coat')).toEqual(['c', 'oa', 't']);
+    expect(graphemes('star')).toEqual(['s', 't', 'ar']);
+    expect(graphemes('fork')).toEqual(['f', 'or', 'k']);
     expect(graphemes('sheep')).toEqual(['sh', 'ee', 'p']);
     expect(graphemes('tooth')).toEqual(['t', 'oo', 'th']);
     expect(graphemes('train')).toEqual(['t', 'r', 'ai', 'n']);
