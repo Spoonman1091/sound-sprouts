@@ -8,3 +8,4 @@ voices/
 tools/audition/candidates/
 .superpowers/
 .DS_Store
+.claude/

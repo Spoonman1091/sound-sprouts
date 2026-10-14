@@ -37,6 +37,13 @@ describe('content assets', () => {
 
   it('credits every third-party source', () => {
     const credits = readFileSync('credits.html', 'utf8');
-    ['OpenMoji', 'CC BY-SA 4.0', 'Piper', 'LJ Speech', 'Andika', 'SIL Open Font License'].forEach((s) => expect(credits).toContain(s));
+    ['OpenMoji', 'CC BY-SA 4.0', 'Andika', 'SIL Open Font License'].forEach((s) => expect(credits).toContain(s));
+  });
+
+  it('credits generated speech only while some clips are still generated', () => {
+    const credits = readFileSync('credits.html', 'utf8');
+    const recorded = JSON.parse(readFileSync('tools/recorder/recorded.json', 'utf8'));
+    const total = LETTER_ORDER.length + PROMPT_IDS.length + PICTURE_WORDS.length + ALPHABET.length;
+    expect(credits.includes('Piper')).toBe(recorded.length < total);
   });
 });
