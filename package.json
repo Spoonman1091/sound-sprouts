@@ -13,7 +13,11 @@
     "content:audio": "node tools/build-audio.mjs",
     "content:images": "node tools/fetch-images.mjs",
     "content:fonts": "node tools/copy-fonts.mjs",
-    "record": "node tools/recorder/server.mjs"
+    "record": "node tools/recorder/server.mjs",
+    "icons": "node tools/make-icons.mjs",
+    "precache": "node tools/gen-precache.mjs",
+    "precache:check": "node tools/gen-precache.mjs --check",
+    "build:site": "node tools/build-site.mjs"
   },
   "devDependencies": {
     "@fontsource/andika": "^5.3.0",

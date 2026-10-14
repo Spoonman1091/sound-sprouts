@@ -79,3 +79,9 @@ function showDashboard() {
 
 stopWhenHidden(document, player);
 showHome();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {
+    state = { ...state, audioErrors: [...state.audioErrors, 'offline mode unavailable'] };
+  });
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Sound Sprouts",
+  "short_name": "Sprouts",
+  "description": "A free phonics garden for young readers.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#fff7e0",
+  "theme_color": "#7cc47f",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
