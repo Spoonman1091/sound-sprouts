@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('home shows the garden with two sprouts', async ({ page }) => {
-  await expect(page.locator('.plot')).toHaveCount(18);
+  await expect(page.locator('.plot')).toHaveCount(22);
   await expect(page.locator('.plot[data-status="sprout"]')).toHaveCount(2);
 });
 

@@ -13,6 +13,8 @@ export const IMAGE_CODEPOINTS = Object.freeze({
   kite: '1FA81', key: '1F511', egg: '1F95A', elephant: '1F418', umbrella: '2602',
   horse: '1F40E', rabbit: '1F407', rainbow: '1F308', fish: '1F41F', ball: '26BD',
   bag: '1F45C', bed: '1F6CF', bus: '1F68C', bug: '1FAB2',
+  lion: '1F981', lemon: '1F34B', jellyfish: '1FABC', juice: '1F9C3', volcano: '1F30B',
+  violin: '1F3BB', worm: '1FAB1', watermelon: '1F349', leg: '1F9B5', web: '1F578',
   cap: '1F9E2', pen: '1F58A', ten: '1F51F', nut: '1F95C', cup: '2615',
   seedling: '1F331', tulip: '1F337', wilted_flower: '1F940',
 });

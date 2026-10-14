@@ -20,6 +20,10 @@ const PHONEMES = [
   { id: 'r', label: 'r', example: 'rabbit', tip: 'A growly "rrr", held for about a second — no "ruh".' },
   { id: 'f', label: 'f', example: 'fish', tip: 'Top teeth on your lip and hold "fff" for about a second — no "fuh".' },
   { id: 'b', label: 'b', example: 'ball', tip: 'Short and bouncy, lips popping apart — keep the "uh" as tiny as you can.' },
+  { id: 'l', label: 'l', example: 'lion', tip: 'Tongue behind your top teeth and hold "lll" for about a second — no "luh".' },
+  { id: 'j', label: 'j', example: 'jellyfish', tip: 'Short, as at the start of "jellyfish" — keep the "uh" as tiny as you can.' },
+  { id: 'v', label: 'v', example: 'volcano', tip: 'Like f but buzzy: hold "vvv" for about a second — no "vuh".' },
+  { id: 'w', label: 'w', example: 'worm', tip: 'Round your lips and glide "ww" — no "wuh", and not the letter name.' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';

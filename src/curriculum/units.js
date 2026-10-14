@@ -1,5 +1,5 @@
-// Letter order follows common synthetic-phonics programmes: s a t p, i n m d, g o c k, e u h r, f b.
-export const LETTER_ORDER = Object.freeze(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b']);
+// Letter order follows common synthetic-phonics programmes: s a t p, i n m d, g o c k, e u h r, f b, l j v w.
+export const LETTER_ORDER = Object.freeze(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w']);
 
 // c and k make the same sound: they share one recording and are never offered against each other.
 const SOUND_TWINS = Object.freeze({ c: 'k', k: 'c' });
@@ -25,6 +25,10 @@ export const FIRST_SOUND_WORDS = Object.freeze({
   r: ['rabbit', 'rainbow'],
   f: ['fish', 'fox'],
   b: ['ball', 'bee'],
+  l: ['lion', 'lemon'],
+  j: ['jellyfish', 'juice'],
+  v: ['volcano', 'violin'],
+  w: ['worm', 'watermelon'],
 });
 
 // First word is the target; the rest rhyme with it.
@@ -42,7 +46,7 @@ export const RHYME_SETS = Object.freeze([
 
 export const BLEND_WORDS = Object.freeze(['pin', 'tap', 'pan', 'tin', 'sip', 'nap', 'dog', 'pig', 'map', 'sad', 'man',
   'cat', 'cap', 'pen', 'ten', 'sun', 'nut', 'cup',
-  'hat', 'bag', 'bed', 'bus', 'bug']);
+  'hat', 'bag', 'bed', 'bus', 'bug', 'log', 'leg', 'web']);
 
 export const PICTURE_WORDS = Object.freeze([
   ...new Set([...Object.values(FIRST_SOUND_WORDS).flat(), ...RHYME_SETS.flat(), ...BLEND_WORDS]),
