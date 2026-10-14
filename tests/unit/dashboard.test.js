@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createProgress } from '../../src/state/progress.js';
 import { renderDashboard } from '../../src/parent/dashboard.js';
+import { LETTER_ORDER } from '../../src/curriculum/units.js';
 import { withMastered } from '../helpers.js';
 
 const baseState = { progress: createProgress(), storageStatus: 'loaded', audioErrors: [] };
@@ -16,7 +17,7 @@ describe('renderDashboard', () => {
   it('shows a row per letter with status', () => {
     const { root } = render({ progress: withMastered(undefined, ['ls:s']) });
     const rows = [...root.querySelectorAll('tbody tr')].map((tr) => tr.textContent);
-    expect(rows).toHaveLength(10);
+    expect(rows).toHaveLength(LETTER_ORDER.length);
     expect(rows[0]).toContain('Mastered');
     expect(rows[1]).toContain('Learning');
     expect(rows[2]).toContain('Not started');

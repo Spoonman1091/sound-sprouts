@@ -43,7 +43,7 @@ describe('content assets', () => {
   it('credits generated speech only while some clips are still generated', () => {
     const credits = readFileSync('credits.html', 'utf8');
     const recorded = JSON.parse(readFileSync('tools/recorder/recorded.json', 'utf8'));
-    const total = LETTER_ORDER.length + PROMPT_IDS.length + PICTURE_WORDS.length + ALPHABET.length;
+    const total = new Set(LETTER_ORDER.map(phoneme)).size + PROMPT_IDS.length + PICTURE_WORDS.length + ALPHABET.length;
     expect(credits.includes('Piper')).toBe(recorded.length < total);
   });
 });

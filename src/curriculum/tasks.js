@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, CHEERS } from './units.js';
+import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, CHEERS, soundsAlike } from './units.js';
 import { shuffle, pick } from './random.js';
 import { unlockedLetters } from './unlock.js';
 import { phoneme, word, prompt, imgPath } from '../audio/clips.js';
@@ -29,7 +29,7 @@ function rhymeTask(index, rng) {
 }
 
 function firstSoundTask(letter, rng) {
-  const others = Object.entries(FIRST_SOUND_WORDS).filter(([l]) => l !== letter).flatMap(([, ws]) => ws);
+  const others = Object.entries(FIRST_SOUND_WORDS).filter(([l]) => !soundsAlike(l, letter)).flatMap(([, ws]) => ws);
   return {
     activity: 'pickOne',
     prompt: [prompt('which_starts_with'), phoneme(letter)],
@@ -40,8 +40,8 @@ function firstSoundTask(letter, rng) {
 function letterSoundTask(letter, progress, rng) {
   // Prefer letters already taught; top up with later letters so there are always enough choices.
   const unlocked = unlockedLetters(progress);
-  const taught = shuffle(unlocked.filter((l) => l !== letter), rng);
-  const later = shuffle(LETTER_ORDER.filter((l) => !unlocked.includes(l)), rng);
+  const taught = shuffle(unlocked.filter((l) => !soundsAlike(l, letter)), rng);
+  const later = shuffle(LETTER_ORDER.filter((l) => !unlocked.includes(l) && !soundsAlike(l, letter)), rng);
   const distractors = [...taught, ...later].slice(0, CONFIG.LETTER_CHOICES - 1);
   return {
     activity: 'pickOne',

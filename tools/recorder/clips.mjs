@@ -13,6 +13,9 @@ const PHONEMES = [
   { id: 'd', label: 'd', example: 'dog', tip: 'A short, light "d" with the tongue. Keep it clipped — no "duh".' },
   { id: 'g', label: 'g', example: 'goat', tip: 'A short, light "g" from the back of the throat, as in "goat". No "guh".' },
   { id: 'o', label: 'o', example: 'octopus', tip: 'Short o, as at the start of "octopus". Not the letter name "oh".' },
+  { id: 'c', label: 'c / k', example: 'cat, kite', tip: 'A quick, whispered "k" sound — no "kuh". This one recording is used for both c and k.' },
+  { id: 'e', label: 'e', example: 'egg', tip: 'Short e, as at the start of "egg". Not the letter name "ee".' },
+  { id: 'u', label: 'u', example: 'umbrella', tip: 'Short u, as at the start of "umbrella". Not the letter name "you".' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';

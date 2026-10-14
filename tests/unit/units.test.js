@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS } from '../../src/curriculum/units.js';
+import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS, soundsAlike } from '../../src/curriculum/units.js';
 
 describe('curriculum data', () => {
-  it('teaches s a t p, i n m d, g o in order', () => {
-    expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o']);
+  it('teaches s a t p, i n m d, g o c k, e u in order', () => {
+    expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u']);
+    ['c', 'k', 'e'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
+    expect(FIRST_SOUND_WORDS.u).toEqual(['umbrella']);
+    expect(BLEND_WORDS).toEqual(expect.arrayContaining(['cat', 'cap', 'pen', 'ten', 'sun', 'nut', 'cup']));
     ['m', 'd', 'g', 'o'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
     expect(BLEND_WORDS).toEqual(expect.arrayContaining(['dog', 'pig', 'map', 'sad', 'man']));
   });
@@ -13,6 +16,13 @@ describe('curriculum data', () => {
       expect(LETTER_ORDER).toContain(letter);
       words.forEach((w) => expect(w[0]).toBe(letter));
     });
+  });
+
+  it('treats c and k as the same sound, and nothing else', () => {
+    expect(soundsAlike('c', 'k')).toBe(true);
+    expect(soundsAlike('k', 'c')).toBe(true);
+    expect(soundsAlike('c', 'c')).toBe(true);
+    expect(soundsAlike('c', 'g')).toBe(false);
   });
 
   it('blend words only use taught letters', () => {

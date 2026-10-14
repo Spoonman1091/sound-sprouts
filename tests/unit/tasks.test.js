@@ -70,11 +70,30 @@ describe('buildTask', () => {
     expect([...task.tileOrder].sort()).toEqual([0, 1, 2, 3]);
   });
 
+  it('c and k share one recording', () => {
+    expect(phoneme('k')).toBe(phoneme('c'));
+  });
+
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])('never offers both c and k as letter choices (seed %i)', (seed) => {
+    const all = withMastered(undefined, LETTER_ORDER.map((l) => `ls:${l}`));
+    ['c', 'k'].forEach((target) => {
+      const ids = buildTask(`ls:${target}`, { progress: all, rng: seededRng(seed) }).choices.map((c) => c.id);
+      expect(ids.filter((id) => id === 'c' || id === 'k')).toEqual([target]);
+    });
+  });
+
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])('first-sound /k/ distractors never start with c or k (seed %i)', (seed) => {
+    ['c', 'k'].forEach((target) => {
+      const task = buildTask(`fs:${target}`, { progress: fresh, rng: seededRng(seed) });
+      task.choices.filter((c) => !c.correct).forEach((c) => expect(['c', 'k']).not.toContain(c.id[0]));
+    });
+  });
+
   it('every task carries a cheer clip', () => {
     expect(buildTask('ls:s', { progress: fresh, rng: seededRng(1) }).cheer).toMatch(/assets\/audio\/prompt\/great_job_\d\.mp3/);
   });
 
-  it.each(['zzz:1', 'fs:i', 'fs:q', 'rhyme:99', 'blend:cat', 'ls:z', 'name'])('throws for unknown item %s', (id) => {
+  it.each(['zzz:1', 'fs:i', 'fs:q', 'rhyme:99', 'blend:zap', 'ls:z', 'name'])('throws for unknown item %s', (id) => {
     expect(() => buildTask(id, { progress: fresh, rng: seededRng(1) })).toThrow();
   });
 });

@@ -4,9 +4,11 @@ export const PROMPT_IDS = Object.freeze([
   'try_again', 'all_done', 'new_flower', 'lets_play',
 ]);
 
+import { PHONEME_SOURCE } from '../curriculum/units.js';
+
 const clipPath = (kind, id) => `assets/audio/${kind}/${id}.mp3`;
 
-export const phoneme = (id) => clipPath('phoneme', id);
+export const phoneme = (id) => clipPath('phoneme', PHONEME_SOURCE[id] ?? id);
 export const letterName = (id) => clipPath('letter', id);
 export const word = (id) => clipPath('word', id);
 export const imgPath = (id) => `assets/img/${id}.svg`;
