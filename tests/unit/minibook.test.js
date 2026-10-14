@@ -8,6 +8,10 @@ describe('minibook', () => {
     expect(minibookWords(withMastered(undefined, ['ls:s', 'ls:i', 'ls:p']))).toEqual(['sip']);
   });
 
+  it('counts a digraph as one sound', () => {
+    expect(minibookWords(withMastered(undefined, ['ls:f', 'ls:i', 'ls:sh']))).toEqual(['fish']);
+  });
+
   it('renders word pages, or letter pages when no words are ready', () => {
     const target = document.createElement('div');
     expect(renderMinibook(target, withMastered(undefined, ['ls:s', 'ls:i', 'ls:p']))).toBe(1);

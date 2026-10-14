@@ -44,6 +44,12 @@ describe('availableItems', () => {
     expect(availableItems(withMastered(undefined, ['ls:s', 'ls:a']))).not.toContain('blend:tap');
   });
 
+  it('needs the digraph itself mastered, not just its letters', () => {
+    const singles = LETTER_ORDER.filter((l) => l.length === 1).map((l) => `ls:${l}`);
+    expect(availableItems(withMastered(undefined, singles))).not.toContain('blend:fish');
+    expect(availableItems(withMastered(undefined, [...singles, 'ls:sh']))).toContain('blend:fish');
+  });
+
   it('has no fs:i item', () => {
     expect(availableItems(withMastered(undefined, allLetterSounds))).not.toContain('fs:i');
   });

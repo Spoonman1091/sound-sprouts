@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('home shows the garden with two sprouts', async ({ page }) => {
-  await expect(page.locator('.plot')).toHaveCount(26);
+  await expect(page.locator('.plot')).toHaveCount(31);
   await expect(page.locator('.plot[data-status="sprout"]')).toHaveCount(2);
 });
 
@@ -45,4 +45,11 @@ test('the page never scrolls sideways', async ({ page }) => {
   await page.locator('.activity').waitFor();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
+});
+
+test('the whole garden and the Play button fit on screen without scrolling', async ({ page }) => {
+  await expect(page.locator('.plot').first()).toBeVisible();
+  const fits = await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight);
+  expect(fits).toBe(true);
+  await expect(page.getByRole('button', { name: 'Play' })).toBeInViewport({ ratio: 1 });
 });

@@ -70,8 +70,20 @@ describe('buildTask', () => {
     expect([...task.tileOrder].sort()).toEqual([0, 1, 2, 3]);
   });
 
-  it('c and k share one recording', () => {
+  it('c, k and ck share one recording', () => {
     expect(phoneme('k')).toBe(phoneme('c'));
+    expect(phoneme('ck')).toBe(phoneme('c'));
+  });
+
+  it('blend tiles are sounds, so digraphs stay on one tile', () => {
+    expect(buildTask('blend:fish', { progress: fresh, rng: seededRng(1) }).letters).toEqual(['f', 'i', 'sh']);
+  });
+
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])('first-sound distractors never begin with the same letter as the target (seed %i)', (seed) => {
+    ['s', 'sh', 'c', 'ch', 't', 'th'].forEach((target) => {
+      const task = buildTask(`fs:${target}`, { progress: fresh, rng: seededRng(seed) });
+      task.choices.filter((c) => !c.correct).forEach((c) => expect(c.id[0]).not.toBe(target[0]));
+    });
   });
 
   it.each([1, 2, 3, 4, 5, 6, 7, 8])('never offers both c and k as letter choices (seed %i)', (seed) => {
@@ -92,7 +104,8 @@ describe('buildTask', () => {
   it.each([1, 2, 3, 4, 5, 6, 7, 8])('first-sound /k/ and /kw/ distractors never start with c, k or q (seed %i)', (seed) => {
     ['c', 'k', 'q'].forEach((target) => {
       const task = buildTask(`fs:${target}`, { progress: fresh, rng: seededRng(seed) });
-      task.choices.filter((c) => !c.correct).forEach((c) => expect(['c', 'k', 'q']).not.toContain(c.id[0]));
+      const kSounds = ['c', 'k', 'q'].flatMap((l) => FIRST_SOUND_WORDS[l]);
+      task.choices.filter((c) => !c.correct).forEach((c) => expect(kSounds).not.toContain(c.id));
     });
   });
 
@@ -100,7 +113,7 @@ describe('buildTask', () => {
     expect(buildTask('ls:s', { progress: fresh, rng: seededRng(1) }).cheer).toMatch(/assets\/audio\/prompt\/great_job_\d\.mp3/);
   });
 
-  it.each(['zzz:1', 'fs:i', 'fs:x', 'rhyme:99', 'blend:zap', 'ls:1', 'name'])('throws for unknown item %s', (id) => {
+  it.each(['zzz:1', 'fs:i', 'fs:x', 'fs:ng', 'fs:ck', 'rhyme:99', 'blend:zap', 'ls:1', 'name'])('throws for unknown item %s', (id) => {
     expect(() => buildTask(id, { progress: fresh, rng: seededRng(1) })).toThrow();
   });
 });

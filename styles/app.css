@@ -48,7 +48,7 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .play img { width: 64px; height: 64px; }
 
 /* Garden */
-.garden { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 12px; width: min(100%, 720px); }
+.garden { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 12px; width: min(100%, 1000px); }
 .plot { aspect-ratio: 1; border-radius: 24px; background: var(--soil); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
 .plot img { width: 60%; }
 .plot .seed { width: 16px; height: 16px; border-radius: 50%; background: #6b4a2b; }

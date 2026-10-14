@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { RHYME_SETS, FIRST_SOUND_WORDS, BLEND_WORDS } from './units.js';
+import { RHYME_SETS, FIRST_SOUND_WORDS, BLEND_WORDS, graphemes } from './units.js';
 import { unlockedLetters } from './unlock.js';
 import { shuffle } from './random.js';
 import { isMastered, isStruggling, lastSeen } from '../state/progress.js';
@@ -12,7 +12,7 @@ export function availableItems(progress) {
   const masteredLetters = letters.filter((l) => isMastered(progress, `ls:${l}`));
   const letterItems = letters.flatMap((l) => (FIRST_SOUND_WORDS[l] ? [`ls:${l}`, `fs:${l}`] : [`ls:${l}`]));
   const blendItems = BLEND_WORDS
-    .filter((w) => [...w].every((ch) => masteredLetters.includes(ch)))
+    .filter((w) => graphemes(w).every((g) => masteredLetters.includes(g)))
     .map((w) => `blend:${w}`);
   const nameItems = nameLetters(progress.childName).length > 0 ? ['name'] : [];
   return [...nameItems, ...RHYME_SETS.map((_, i) => `rhyme:${i}`), ...letterItems, ...blendItems];

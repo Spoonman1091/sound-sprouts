@@ -28,6 +28,10 @@ const PHONEMES = [
   { id: 'y', label: 'y', example: 'yo-yo', tip: 'The start of "yo-yo": a quick "yy" glide — no "yuh", and not the letter name.' },
   { id: 'z', label: 'z', example: 'zebra', tip: 'A buzzing "zzz", held for about a second — no "zuh", and not "zee".' },
   { id: 'q', label: 'q (qu)', example: 'queen', tip: 'q always comes with u: say "kw", as at the start of "queen". Quick and whispered.' },
+  { id: 'sh', label: 'sh', example: 'ship', tip: 'The "be quiet" sound: hold "shhh" for about a second.' },
+  { id: 'ch', label: 'ch', example: 'chick', tip: 'A quick sneeze-like "ch", as at the start of "chick" — no "chuh".' },
+  { id: 'th', label: 'th', example: 'thumb', tip: 'Tongue between your teeth and blow a soft "thhh", as in "thumb" (not the buzzy "th" in "this").' },
+  { id: 'ng', label: 'ng', example: 'ring', tip: 'The hum at the end of "ring": back of the tongue up, hold "nngg" for about a second.' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';

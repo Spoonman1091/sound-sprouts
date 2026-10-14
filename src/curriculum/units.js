@@ -1,14 +1,27 @@
-// Letter order follows common synthetic-phonics programmes: s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q.
-export const LETTER_ORDER = Object.freeze(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q']);
+// Letter order follows common synthetic-phonics programmes: s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q,
+// then the digraphs sh ch th ng ck (two letters, one sound).
+export const LETTER_ORDER = Object.freeze(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q',
+  'sh', 'ch', 'th', 'ng', 'ck']);
 
-// c and k make the same sound and share one recording; q ("kw") starts with it too.
+const DIGRAPHS = Object.freeze(LETTER_ORDER.filter((l) => l.length === 2));
+
+// Split a word into its sounds, keeping digraphs together: 'chick' -> ['ch', 'i', 'ck'].
+export function graphemes(w) {
+  if (!w) return [];
+  const digraph = DIGRAPHS.find((d) => w.startsWith(d));
+  const head = digraph ?? w[0];
+  return [head, ...graphemes(w.slice(head.length))];
+}
+
+// c, k and ck make the same sound and share one recording; q ("kw") starts with it too.
 // Letters in a group are never offered against each other.
-const SOUND_GROUPS = Object.freeze([['c', 'k', 'q']]);
-export const PHONEME_SOURCE = Object.freeze({ k: 'c' });
+const SOUND_GROUPS = Object.freeze([['c', 'k', 'q', 'ck']]);
+export const PHONEME_SOURCE = Object.freeze({ k: 'c', ck: 'c' });
 export const soundsAlike = (a, b) => a === b || SOUND_GROUPS.some((g) => g.includes(a) && g.includes(b));
 
 // No reliable picturable short-/i/ word exists in OpenMoji, so 'i' has no first-sound item.
-// No word a child knows starts with x's "ks" sound, so x is practised through blends (fox, box, six).
+// No word a child knows starts with x's "ks" sound, so x is practised through blends (fox, box, six);
+// likewise ng and ck only come at the ends of words.
 export const FIRST_SOUND_WORDS = Object.freeze({
   s: ['sun', 'sock'],
   a: ['apple', 'ant'],
@@ -34,6 +47,9 @@ export const FIRST_SOUND_WORDS = Object.freeze({
   y: ['yoyo', 'yarn'],
   z: ['zebra', 'zero'],
   q: ['queen'],
+  sh: ['ship', 'sheep'],
+  ch: ['chick', 'cheese'],
+  th: ['thumb', 'three'],
 });
 
 // First word is the target; the rest rhyme with it.
@@ -52,7 +68,8 @@ export const RHYME_SETS = Object.freeze([
 export const BLEND_WORDS = Object.freeze(['pin', 'tap', 'pan', 'tin', 'sip', 'nap', 'dog', 'pig', 'map', 'sad', 'man',
   'cat', 'cap', 'pen', 'ten', 'sun', 'nut', 'cup',
   'hat', 'bag', 'bed', 'bus', 'bug', 'log', 'leg', 'web',
-  'fox', 'box', 'six']);
+  'fox', 'box', 'six',
+  'fish', 'ship', 'chick', 'duck', 'sock', 'rock', 'bath', 'ring']);
 
 export const PICTURE_WORDS = Object.freeze([
   ...new Set([...Object.values(FIRST_SOUND_WORDS).flat(), ...RHYME_SETS.flat(), ...BLEND_WORDS]),

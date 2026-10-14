@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, CHEERS, soundsAlike } from './units.js';
+import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, CHEERS, soundsAlike, graphemes } from './units.js';
 import { shuffle, pick } from './random.js';
 import { unlockedLetters } from './unlock.js';
 import { phoneme, word, prompt, imgPath } from '../audio/clips.js';
@@ -28,8 +28,11 @@ function rhymeTask(index, rng) {
   };
 }
 
+// s/sh, c/ch and t/th look alike at the start of a word, so they are never distractors for each other here.
+const clearlyDifferent = (l, letter) => !soundsAlike(l, letter) && l[0] !== letter[0];
+
 function firstSoundTask(letter, rng) {
-  const others = Object.entries(FIRST_SOUND_WORDS).filter(([l]) => !soundsAlike(l, letter)).flatMap(([, ws]) => ws);
+  const others = Object.entries(FIRST_SOUND_WORDS).filter(([l]) => clearlyDifferent(l, letter)).flatMap(([, ws]) => ws);
   return {
     activity: 'pickOne',
     prompt: [prompt('which_starts_with'), phoneme(letter)],
@@ -52,7 +55,7 @@ function letterSoundTask(letter, progress, rng) {
 
 function blendTask(w, rng) {
   const others = BLEND_WORDS.filter((x) => x !== w);
-  return { activity: 'blend', word: w, letters: [...w], choices: shuffle([pictureChoice(w, true), ...pictureDistractors(others, rng)], rng) };
+  return { activity: 'blend', word: w, letters: graphemes(w), choices: shuffle([pictureChoice(w, true), ...pictureDistractors(others, rng)], rng) };
 }
 
 function nameTask(progress, rng) {
