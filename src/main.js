@@ -6,6 +6,10 @@ import { planSession } from './curriculum/scheduler.js';
 import { renderHome } from './screens/home.js';
 import { runSession } from './screens/session.js';
 import { renderDone } from './screens/done.js';
+import { createProgress, setChildName } from './state/progress.js';
+import { renderGate } from './parent/gate.js';
+import { renderDashboard } from './parent/dashboard.js';
+import { renderMinibook } from './parent/minibook.js';
 
 const root = document.getElementById('app');
 
@@ -59,7 +63,18 @@ async function startSession() {
 }
 
 function showGate() {
-  showHome();
+  player.stop();
+  renderGate(root, { onPass: showDashboard, onCancel: showHome });
+}
+
+function showDashboard() {
+  renderDashboard(root, {
+    state,
+    onSaveName: (name) => { save(setChildName(state.progress, name)); showDashboard(); },
+    onReset: () => { save({ ...createProgress(), childName: state.progress.childName }); showDashboard(); },
+    onPrint: () => { renderMinibook(document.getElementById('print'), state.progress); window.print(); },
+    onDone: showHome,
+  });
 }
 
 stopWhenHidden(document, player);
