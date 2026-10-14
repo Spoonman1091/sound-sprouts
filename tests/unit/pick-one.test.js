@@ -153,5 +153,60 @@ describe('runPickOne', () => {
     expect(done).not.toHaveBeenCalled();
     expect(root.querySelector('.activity').dataset.ready).toBe('true');
   });
+
+  describe('narrated choices', () => {
+    const narrated = { ...task, narrate: true };
+
+    it('after the question, lights up each picture in turn while saying its word', async () => {
+      const root = document.createElement('div');
+      const lit = [];
+      const player = fakePlayer({
+        play: vi.fn(async (clip) => {
+          lit.push([clip, [...root.querySelectorAll('.choice.narrating')].map((b) => b.dataset.choiceId)]);
+          return { ok: true };
+        }),
+      });
+      runPickOne(root, narrated, { player });
+      await flush();
+      expect(lit).toEqual([['sun.mp3', ['sun']], ['pig.mp3', ['pig']]]);
+      expect(root.querySelectorAll('.choice.narrating')).toHaveLength(0);
+      expect(player.playSequence.mock.invocationCallOrder[0]).toBeLessThan(player.play.mock.invocationCallOrder[0]);
+    });
+
+    it('ignores taps until every picture has been named', async () => {
+      const root = document.createElement('div');
+      const gate = deferred();
+      const player = fakePlayer({ play: vi.fn(() => gate.promise) });
+      const done = vi.fn();
+      runPickOne(root, narrated, { player }).then(done);
+      await flush();
+      expect(root.querySelector('.activity').dataset.ready).toBe('false');
+      choice(root, 'sun').click();
+      await flush();
+      expect(done).not.toHaveBeenCalled();
+      gate.resolve({ ok: true });
+      await flush();
+      expect(root.querySelector('.activity').dataset.ready).toBe('true');
+    });
+
+    it('re-asking after a wrong answer only names the pictures still in play', async () => {
+      const root = document.createElement('div');
+      const player = fakePlayer();
+      runPickOne(root, narrated, { player });
+      await flush();
+      player.play.mockClear();
+      choice(root, 'pig').click();
+      await flush();
+      expect(player.play.mock.calls.map(([clip]) => clip)).toEqual(['pig.mp3', prompt('try_again'), 'sun.mp3']);
+    });
+
+    it('does not name the choices unless the task asks for it', async () => {
+      const root = document.createElement('div');
+      const player = fakePlayer();
+      runPickOne(root, task, { player });
+      await flush();
+      expect(player.play).not.toHaveBeenCalled();
+    });
+  });
 });
 

@@ -31,9 +31,24 @@ export function runPickOne(container, task, deps) {
     let firstTry = true;
     const setReady = (value) => { ready = value; root.dataset.ready = String(value); };
 
+    // Light up each picture still in play while its word is said, so she knows what every option is.
+    const narrate = async () => {
+      const remaining = buttons.filter((button) => !button.disabled);
+      for (const button of remaining) {
+        button.classList.add('narrating');
+        await player.play(task.choices[buttons.indexOf(button)].audio);
+        button.classList.remove('narrating');
+      }
+    };
+
     const ask = async () => {
       setReady(false);
       await player.playSequence(task.prompt);
+      if (task.narrate) {
+        root.dataset.narrating = 'true';
+        await narrate();
+        delete root.dataset.narrating;
+      }
       setReady(true);
     };
 

@@ -23,6 +23,7 @@ function rhymeTask(index, rng) {
     focusImg: imgPath(target),
     focusAudio: word(target),
     focusLabel: target,
+    narrate: true,
     prompt: [prompt('which_rhymes_with'), word(target)],
     choices: shuffle([pictureChoice(pick(rhymes, rng), true), ...pictureDistractors(others, rng)], rng),
   };
@@ -35,6 +36,7 @@ function firstSoundTask(letter, rng) {
   const others = Object.entries(FIRST_SOUND_WORDS).filter(([l]) => clearlyDifferent(l, letter)).flatMap(([, ws]) => ws);
   return {
     activity: 'pickOne',
+    narrate: true,
     prompt: [prompt('which_starts_with'), phoneme(letter)],
     choices: shuffle([pictureChoice(pick(FIRST_SOUND_WORDS[letter], rng), true), ...pictureDistractors(others, rng)], rng),
   };

@@ -23,6 +23,14 @@ describe('buildTask', () => {
     task.choices.filter((c) => !c.correct).forEach((c) => expect(RHYME_SETS[0]).not.toContain(c.id));
   });
 
+  it('names the pictures aloud for rhyme and first-sound questions, but not letter or blend ones', () => {
+    const narrate = (id) => buildTask(id, { progress: fresh, rng: seededRng(1) }).narrate;
+    expect(narrate('rhyme:0')).toBe(true);
+    expect(narrate('fs:s')).toBe(true);
+    expect(narrate('ls:s')).toBeFalsy();
+    expect(narrate('blend:pin')).toBeFalsy();
+  });
+
   it('first-sound task offers a matching word and a non-matching distractor', () => {
     const task = buildTask('fs:s', { progress: fresh, rng: seededRng(3) });
     expect(task.prompt).toEqual([prompt('which_starts_with'), phoneme('s')]);

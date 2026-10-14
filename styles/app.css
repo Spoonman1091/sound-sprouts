@@ -76,6 +76,9 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .choice img { width: 75%; }
 .choice .letter { font-size: clamp(4rem, 12vw, 7rem); font-weight: 700; }
 .choice.wrong { opacity: .25; transform: scale(.9); }
+.activity[data-narrating="true"] > .choices { opacity: 1; }
+.activity[data-narrating="true"] .choice:not(.narrating):not(.wrong) { opacity: .55; }
+.choice.narrating { transform: scale(1.08); box-shadow: 0 0 0 6px var(--leaf), 0 8px 0 var(--shadow); }
 .choice.right { background: var(--leaf); animation: pop .4s; }
 @keyframes pop { 50% { transform: scale(1.1); } }
 .tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
