@@ -23,7 +23,7 @@ export async function runSession({ container, progress, planIds, sessionId, deps
   let current = progress;
   for (const [index, itemId] of planIds.entries()) {
     const task = buildTask(itemId, { progress: current, rng });
-    const { firstTry } = await activities[task.activity](shell.stage, task, { ...deps, settleMs: CONFIG.SETTLE_MS, questionGapMs: CONFIG.QUESTION_GAP_MS, narrateGapMs: CONFIG.NARRATION_GAP_MS });
+    const { firstTry } = await activities[task.activity](shell.stage, task, { ...deps, settleMs: CONFIG.SETTLE_MS, leadInGapMs: CONFIG.LEAD_IN_GAP_MS, questionGapMs: CONFIG.QUESTION_GAP_MS, narrateGapMs: CONFIG.NARRATION_GAP_MS });
     current = recordAttempt(current, { itemId, firstTry, sessionId, at: now() });
     save(current);
     shell.markDone(index);

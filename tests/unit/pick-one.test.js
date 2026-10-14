@@ -237,5 +237,24 @@ describe('runPickOne', () => {
       expect(player.play).not.toHaveBeenCalled();
     });
   });
-});
 
+  it('pauses between the lead-in and the rest of the question when the task asks for it', async () => {
+    const root = document.createElement('div');
+    const events = [];
+    const player = fakePlayer({ playSequence: vi.fn(async (clips) => { events.push(clips.join('+')); return { ok: true }; }) });
+    const wait = vi.fn(async (ms) => { events.push(`wait ${ms}`); });
+    runPickOne(root, { ...task, pauseAfterLeadIn: true }, { player, wait, leadInGapMs: 700 });
+    await flush();
+    expect(events).toEqual(['p1.mp3', 'wait 700', 'p2.mp3']);
+  });
+
+  it('plays the question in one go when the task does not ask for a pause', async () => {
+    const root = document.createElement('div');
+    const player = fakePlayer();
+    const wait = vi.fn(async () => {});
+    runPickOne(root, task, { player, wait, leadInGapMs: 700 });
+    await flush();
+    expect(player.playSequence).toHaveBeenCalledWith(['p1.mp3', 'p2.mp3']);
+    expect(wait).not.toHaveBeenCalled();
+  });
+});

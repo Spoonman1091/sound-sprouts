@@ -24,7 +24,7 @@ function renderPickOne(task) {
 }
 
 export function runPickOne(container, task, deps) {
-  const { player, wait = pause, questionGapMs = 0, narrateGapMs = 0 } = deps;
+  const { player, wait = pause, leadInGapMs = 0, questionGapMs = 0, narrateGapMs = 0 } = deps;
   const hold = (ms) => (ms > 0 ? wait(ms) : Promise.resolve());
   return new Promise((resolve) => {
     const { root, replay, buttons, focus } = renderPickOne(task);
@@ -46,9 +46,18 @@ export function runPickOne(container, task, deps) {
       }
     };
 
+    // "Which one rhymes with... [pause] cat", so the word stands out from the lead-in.
+    const playQuestion = async () => {
+      if (!task.pauseAfterLeadIn) return player.playSequence(task.prompt);
+      const [leadIn, ...rest] = task.prompt;
+      await player.playSequence([leadIn]);
+      await hold(leadInGapMs);
+      return player.playSequence(rest);
+    };
+
     const ask = async () => {
       setReady(false);
-      await player.playSequence(task.prompt);
+      await playQuestion();
       if (task.narrate) {
         root.dataset.narrating = 'true';
         await narrate();
