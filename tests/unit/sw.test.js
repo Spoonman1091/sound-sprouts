@@ -3,12 +3,18 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-function loadServiceWorker() {
+function loadServiceWorker(caches = {}) {
   const listeners = {};
   const context = {
-    self: { PRECACHE: { version: 'test', files: [] }, addEventListener: (t, fn) => { listeners[t] = fn; }, location: { origin: 'http://x' } },
+    self: {
+      PRECACHE: { version: 'test', files: ['./', './index.html'] },
+      addEventListener: (t, fn) => { listeners[t] = fn; },
+      location: { origin: 'http://x' },
+      skipWaiting: () => Promise.resolve(),
+    },
     importScripts: () => {},
-    caches: {},
+    caches,
+    Request: class { constructor(url, init = {}) { this.url = url; this.cache = init.cache ?? 'default'; } },
     Response: globalThis.Response,
     URL: globalThis.URL,
     Promise,
@@ -45,6 +51,16 @@ describe('service worker', () => {
     expect(res.status).toBe(206);
     expect(res.headers.get('Content-Range')).toBe('bytes 2-4/6');
     expect([...new Uint8Array(await res.arrayBuffer())]).toEqual([2, 3, 4]);
+  });
+
+  it('install bypasses the HTTP cache so a new version never stores stale files', async () => {
+    const added = [];
+    const fakeCaches = { open: async () => ({ addAll: async (reqs) => { added.push(...reqs); } }) };
+    const sw = loadServiceWorker(fakeCaches);
+    let waited;
+    sw.listeners.install({ waitUntil: (p) => { waited = p; } });
+    await waited;
+    expect(added.map((r) => [r.url, r.cache])).toEqual([['./', 'reload'], ['./index.html', 'reload']]);
   });
 
   it('returns 416 for an unsatisfiable range', async () => {

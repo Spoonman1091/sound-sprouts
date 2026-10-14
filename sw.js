@@ -38,7 +38,8 @@ async function respond(request) {
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME)
-    .then((cache) => cache.addAll(self.PRECACHE.files))
+    // cache: 'reload' skips the HTTP cache (Pages sends max-age=600) so a new version never stores stale files.
+    .then((cache) => cache.addAll(self.PRECACHE.files.map((file) => new Request(file, { cache: 'reload' }))))
     .then(() => self.skipWaiting()));
 });
 
