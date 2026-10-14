@@ -21,6 +21,8 @@ export const IMAGE_CODEPOINTS = Object.freeze({
   three: '0033-FE0F-20E3', rock: '1FAA8', bath: '1F6C1', ring: '1F48D',
   stop: '1F6D1', hand: '270B', crab: '1F980', drum: '1F941', flag: '1F6A9',
   milk: '1F95B', clock: '1F570', plant: '1FAB4',
+  tooth: '1F9B7', boot: '1F462', broom: '1F9F9', rain: '1F327', snail: '1F40C',
+  train: '1F686', chain: '26D3',
   cap: '1F9E2', pen: '1F58A', ten: '1F51F', nut: '1F95C', cup: '2615',
   seedling: '1F331', tulip: '1F337', wilted_flower: '1F940',
 });

@@ -4,7 +4,7 @@ import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS
 describe('curriculum data', () => {
   it('teaches s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q in order', () => {
     expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q',
-      'sh', 'ch', 'th', 'ng', 'ck']);
+      'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai']);
     expect(LETTER_ORDER.filter((l) => l.length === 1).sort().join('')).toBe('abcdefghijklmnopqrstuvwxyz');
     ['y', 'z'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
     expect(FIRST_SOUND_WORDS.q).toEqual(['queen']);
@@ -58,7 +58,7 @@ describe('curriculum data', () => {
   });
 
   it('ends with the digraphs sh ch th ng ck', () => {
-    expect(LETTER_ORDER.slice(-5)).toEqual(['sh', 'ch', 'th', 'ng', 'ck']);
+    expect(LETTER_ORDER.slice(26, 31)).toEqual(['sh', 'ch', 'th', 'ng', 'ck']);
     ['sh', 'ch', 'th'].forEach((d) => expect(FIRST_SOUND_WORDS[d]).toHaveLength(2));
     expect(FIRST_SOUND_WORDS.ng).toBeUndefined();
     expect(FIRST_SOUND_WORDS.ck).toBeUndefined();
@@ -71,6 +71,19 @@ describe('curriculum data', () => {
     expect(isLongWord('plant')).toBe(true);
     expect(isLongWord('fish')).toBe(false);
     expect(isLongWord('cat')).toBe(false);
+  });
+
+  it('ends with the long-vowel teams ee oo ai, practised through blends', () => {
+    expect(LETTER_ORDER.slice(-3)).toEqual(['ee', 'oo', 'ai']);
+    ['ee', 'oo', 'ai'].forEach((v) => expect(FIRST_SOUND_WORDS[v]).toBeUndefined());
+    expect(BLEND_WORDS).toEqual(expect.arrayContaining(['bee', 'tree', 'sheep', 'three', 'moon', 'spoon', 'tooth', 'boot', 'broom', 'rain', 'snail', 'train', 'chain']));
+  });
+
+  it('keeps vowel teams together when splitting words', () => {
+    expect(graphemes('sheep')).toEqual(['sh', 'ee', 'p']);
+    expect(graphemes('tooth')).toEqual(['t', 'oo', 'th']);
+    expect(graphemes('train')).toEqual(['t', 'r', 'ai', 'n']);
+    expect(graphemes('bee')).toEqual(['b', 'ee']);
   });
 
   it('splits words into sounds, keeping digraphs together', () => {

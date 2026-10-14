@@ -32,6 +32,9 @@ const PHONEMES = [
   { id: 'ch', label: 'ch', example: 'chick', tip: 'A quick sneeze-like "ch", as at the start of "chick" — no "chuh".' },
   { id: 'th', label: 'th', example: 'thumb', tip: 'Tongue between your teeth and blow a soft "thhh", as in "thumb" (not the buzzy "th" in "this").' },
   { id: 'ng', label: 'ng', example: 'ring', tip: 'The hum at the end of "ring": back of the tongue up, hold "nngg" for about a second.' },
+  { id: 'ee', label: 'ee', example: 'bee', tip: 'A long, smiley "eee", as in "bee", held for about a second.' },
+  { id: 'oo', label: 'oo', example: 'moon', tip: 'A long "ooo", as in "moon" (not the short "oo" in "book"), held for about a second.' },
+  { id: 'ai', label: 'ai', example: 'rain', tip: 'A long "ay", as in "rain", held for about a second.' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';
