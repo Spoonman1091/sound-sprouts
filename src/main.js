@@ -1,7 +1,7 @@
 import { createPlayer } from './audio/player.js';
 import { stopWhenHidden } from './audio/visibility.js';
 import { prompt } from './audio/clips.js';
-import { loadProgress, saveProgress, createMemoryStorage } from './state/storage.js';
+import { loadProgress, saveProgress, createMemoryStorage, hasUnreadableBackup, dismissUnreadable } from './state/storage.js';
 import { planSession } from './curriculum/scheduler.js';
 import { renderHome } from './screens/home.js';
 import { runSession } from './screens/session.js';
@@ -27,7 +27,7 @@ const { storage, available } = deviceStorage();
 const loaded = loadProgress(storage);
 let state = {
   progress: loaded.progress,
-  storageStatus: available ? loaded.status : 'unavailable',
+  storageStatus: !available ? 'unavailable' : (hasUnreadableBackup(storage) ? 'reset' : loaded.status),
   audioErrors: [],
 };
 
@@ -74,6 +74,7 @@ function showDashboard() {
     onReset: () => { save({ ...createProgress(), childName: state.progress.childName }); showDashboard(); },
     onPrint: () => { renderMinibook(document.getElementById('print'), state.progress); window.print(); },
     onDone: showHome,
+    onDismissNotice: () => { dismissUnreadable(storage); state = { ...state, storageStatus: 'loaded' }; showDashboard(); },
   });
 }
 

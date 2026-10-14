@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CONFIG } from '../../src/config.js';
 import { createProgress, recordAttempt } from '../../src/state/progress.js';
-import { loadProgress, saveProgress, createMemoryStorage } from '../../src/state/storage.js';
+import { loadProgress, saveProgress, createMemoryStorage, hasUnreadableBackup, dismissUnreadable } from '../../src/state/storage.js';
 
 const throwing = { getItem() { throw new Error('denied'); }, setItem() { throw new Error('quota'); } };
 
@@ -28,6 +28,24 @@ describe('storage', () => {
     const storage = createMemoryStorage();
     storage.setItem(CONFIG.STORAGE_KEY, raw);
     expect(loadProgress(storage)).toEqual({ progress: createProgress(), status: 'reset' });
+  });
+
+  it('keeps unreadable data aside so the parent is told even after the next save', () => {
+    const storage = createMemoryStorage();
+    storage.setItem(CONFIG.STORAGE_KEY, '{broken');
+    expect(loadProgress(storage).status).toBe('reset');
+    expect(storage.getItem(`${CONFIG.STORAGE_KEY}:unreadable`)).toBe('{broken');
+    saveProgress(storage, createProgress());
+    expect(loadProgress(storage).status).toBe('loaded');
+    expect(hasUnreadableBackup(storage)).toBe(true);
+    dismissUnreadable(storage);
+    expect(hasUnreadableBackup(storage)).toBe(false);
+  });
+
+  it('backup helpers never throw on unavailable storage', () => {
+    const broken = { getItem() { throw new Error('x'); }, removeItem() { throw new Error('x'); } };
+    expect(hasUnreadableBackup(broken)).toBe(false);
+    expect(() => dismissUnreadable(broken)).not.toThrow();
   });
 
   it('reports unavailable storage instead of throwing', () => {

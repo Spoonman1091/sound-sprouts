@@ -37,16 +37,18 @@ function lettersSection(progress) {
   ])]);
 }
 
-function noticesSection(state) {
+function noticesSection(state, onDismissNotice) {
   const count = state.audioErrors.length;
-  const notices = [
-    STORAGE_NOTICES[state.storageStatus],
-    count ? `${count} sound${count === 1 ? '' : 's'} didn't play. Check the connection, then reload.` : null,
+  const storageNotice = STORAGE_NOTICES[state.storageStatus];
+  const dismiss = el('button', { class: 'link' }, ['Dismiss']);
+  dismiss.addEventListener('click', onDismissNotice);
+  return [
+    storageNotice ? el('p', { class: 'notice' }, [storageNotice, state.storageStatus === 'reset' ? dismiss : null]) : null,
+    count ? el('p', { class: 'notice' }, [`${count} sound${count === 1 ? '' : 's'} didn't play. Check the connection, then reload.`]) : null,
   ].filter(Boolean);
-  return notices.map((text) => el('p', { class: 'notice' }, [text]));
 }
 
-export function renderDashboard(container, { state, now = Date.now, confirmFn = (m) => window.confirm(m), onSaveName, onReset, onPrint, onDone }) {
+export function renderDashboard(container, { state, now = Date.now, confirmFn = (m) => window.confirm(m), onSaveName, onReset, onPrint, onDone, onDismissNotice }) {
   const { progress } = state;
   const practice = practiceList(progress);
   const action = (label, handler, cls = '') => {
@@ -56,7 +58,7 @@ export function renderDashboard(container, { state, now = Date.now, confirmFn = 
   };
   container.replaceChildren(el('div', { class: 'dashboard' }, [
     el('h1', {}, ['Grown-ups']),
-    ...noticesSection(state),
+    ...noticesSection(state, onDismissNotice),
     nameSection(progress, onSaveName),
     lettersSection(progress),
     el('section', {}, [

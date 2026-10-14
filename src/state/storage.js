@@ -24,12 +24,41 @@ function parse(raw) {
   }
 }
 
+const BACKUP_KEY = `${CONFIG.STORAGE_KEY}:unreadable`;
+
+// Unreadable data is set aside (not lost) and flags a notice until the parent dismisses it.
+function backUpUnreadable(storage, raw) {
+  try {
+    storage.setItem(BACKUP_KEY, raw);
+  } catch {
+    // Storage full: the notice still shows for this run via status 'reset'.
+  }
+}
+
+export function hasUnreadableBackup(storage) {
+  try {
+    return storage.getItem(BACKUP_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+export function dismissUnreadable(storage) {
+  try {
+    storage.removeItem(BACKUP_KEY);
+  } catch {
+    // Nothing to clear if storage is unavailable.
+  }
+}
+
 export function loadProgress(storage) {
   try {
     const raw = storage.getItem(CONFIG.STORAGE_KEY);
     if (raw === null) return { progress: createProgress(), status: 'fresh' };
     const progress = parse(raw);
-    return progress ? { progress, status: 'loaded' } : { progress: createProgress(), status: 'reset' };
+    if (progress) return { progress, status: 'loaded' };
+    backUpUnreadable(storage, raw);
+    return { progress: createProgress(), status: 'reset' };
   } catch {
     return { progress: createProgress(), status: 'unavailable' };
   }

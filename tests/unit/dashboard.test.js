@@ -6,7 +6,7 @@ import { withMastered } from '../helpers.js';
 const baseState = { progress: createProgress(), storageStatus: 'loaded', audioErrors: [] };
 const render = (overrides = {}, handlers = {}) => {
   const root = document.createElement('div');
-  const h = { onSaveName: vi.fn(), onReset: vi.fn(), onPrint: vi.fn(), onDone: vi.fn(), confirmFn: vi.fn(() => true), ...handlers };
+  const h = { onSaveName: vi.fn(), onReset: vi.fn(), onPrint: vi.fn(), onDone: vi.fn(), onDismissNotice: vi.fn(), confirmFn: vi.fn(() => true), ...handlers };
   renderDashboard(root, { state: { ...baseState, ...overrides }, now: () => 0, ...h });
   return { root, h };
 };
@@ -48,6 +48,13 @@ describe('renderDashboard', () => {
     ['unavailable', /can't save/],
   ])('explains storage status %s', (storageStatus, text) => {
     expect(render({ storageStatus }).root.querySelector('.notice').textContent).toMatch(text);
+  });
+
+  it('lets the parent dismiss the started-fresh notice', () => {
+    const { root, h } = render({ storageStatus: 'reset' });
+    button(root, 'Dismiss').click();
+    expect(h.onDismissNotice).toHaveBeenCalledOnce();
+    expect(button(render({ storageStatus: 'unavailable' }).root, 'Dismiss')).toBeUndefined();
   });
 
   it('warns about sounds that failed to play', () => {
