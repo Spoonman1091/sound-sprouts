@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { CONFIG } from '../../src/config.js';
 import { createProgress } from '../../src/state/progress.js';
 import { runSession } from '../../src/screens/session.js';
 import { fakePlayer, seededRng } from '../helpers.js';
@@ -19,7 +20,7 @@ describe('runSession', () => {
       progress: createProgress(),
       planIds: ['rhyme:0', 'ls:s', 'fs:s'],
       sessionId: 'sess-1',
-      deps: { player: fakePlayer(), activities: fakeActivities([true, false, true]) },
+      deps: { player: fakePlayer(), activities: fakeActivities([true, false, true]), wait: async () => {} },
       save: (p) => saves.push(p),
       now: () => (clock += 1),
       rng: seededRng(1),
@@ -41,7 +42,7 @@ describe('runSession', () => {
       progress: createProgress(),
       planIds: ['ls:s', 'ls:a'],
       sessionId: 's',
-      deps: { player: fakePlayer(), activities: { pickOne: run, blend: run, nameSpell: run } },
+      deps: { player: fakePlayer(), activities: { pickOne: run, blend: run, nameSpell: run }, wait: async () => {} },
       save: (p) => saves.push(p),
       now: () => 1,
       rng: seededRng(1),
@@ -49,5 +50,24 @@ describe('runSession', () => {
     await new Promise((r) => setTimeout(r, 0));
     expect(saves).toHaveLength(1);
     expect(saves[0].items['ls:s']).toBeDefined();
+  });
+
+  it('pauses after every item so one activity does not tumble into the next', async () => {
+    const order = [];
+    const run = vi.fn(async () => { order.push('activity'); return { firstTry: true }; });
+    const wait = vi.fn(async (ms) => { order.push(`wait ${ms}`); });
+    await runSession({
+      container: document.createElement('div'),
+      progress: createProgress(),
+      planIds: ['ls:s', 'ls:a'],
+      sessionId: 's',
+      deps: { player: fakePlayer(), activities: { pickOne: run, blend: run, nameSpell: run }, wait },
+      save: () => {},
+      now: () => 1,
+      rng: seededRng(1),
+    });
+    const pause = `wait ${CONFIG.TRANSITION_MS}`;
+    expect(order).toEqual(['activity', pause, 'activity', pause]);
+    expect(CONFIG.TRANSITION_MS).toBeGreaterThanOrEqual(600);
   });
 });

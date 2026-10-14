@@ -13,11 +13,13 @@ export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 const PORT = 4174;
 const AUDIO_DIR = 'assets/audio';
 export const RECORDED_MANIFEST = 'tools/recorder/recorded.json';
+// Trim only true silence (-55 dB) so soft endings like the "s" in "grows" survive, then add a short natural tail.
 const CLEAN_FILTER = [
   'highpass=f=80',
-  'silenceremove=start_periods=1:start_threshold=-40dB', 'afade=t=in:d=0.01', 'areverse',
-  'silenceremove=start_periods=1:start_threshold=-40dB', 'afade=t=in:d=0.02', 'areverse',
+  'silenceremove=start_periods=1:start_threshold=-50dB', 'afade=t=in:d=0.01', 'areverse',
+  'silenceremove=start_periods=1:start_threshold=-55dB', 'afade=t=in:d=0.04', 'areverse',
   'loudnorm=I=-16',
+  'apad=pad_dur=0.25',
 ].join(',');
 
 function send(res, status, body, type = 'application/json') {
@@ -114,14 +116,24 @@ function markRecorded(clip) {
   if (!list.includes(key)) writeFileSync(RECORDED_MANIFEST, `${JSON.stringify([...list, key].sort(), null, 2)}\n`);
 }
 
-function convertToMp3(clip, input) {
+// Cleans a raw take (any browser format) into a levelled MP3 at outPath.
+export function processTake(input, outPath) {
   const dir = mkdtempSync(join(tmpdir(), 'sound-sprouts-'));
   try {
     const raw = join(dir, 'take');
-    const mp3 = join(dir, 'clip.mp3');
     writeFileSync(raw, input);
-    const result = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-protocol_whitelist', 'file', '-i', raw, '-af', CLEAN_FILTER, '-ac', '1', '-ar', '44100', '-b:a', '96k', mp3], { encoding: 'utf8' });
+    const result = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-protocol_whitelist', 'file', '-i', raw, '-af', CLEAN_FILTER, '-ac', '1', '-ar', '44100', '-b:a', '96k', outPath], { encoding: 'utf8' });
     if (result.status !== 0) throw new Error(result.stderr || 'ffmpeg failed');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+function convertToMp3(clip, input) {
+  const dir = mkdtempSync(join(tmpdir(), 'sound-sprouts-'));
+  try {
+    const mp3 = join(dir, 'clip.mp3');
+    processTake(input, mp3);
     mkdirSync(`${AUDIO_DIR}/${clip.kind}`, { recursive: true });
     copyFileSync(mp3, clipPath(clip));
     markRecorded(clip);

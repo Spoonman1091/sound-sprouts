@@ -45,8 +45,10 @@ export async function playWholeSession(page, { name = '' } = {}) {
   await dots.first().waitFor();
   const total = await dots.count();
   for (let step = 0; step < total; step += 1) {
+    const current = await page.locator('.stage > .activity').elementHandle();
     await answerCurrent(page, name);
-    // After the last answer the done screen replaces the dots.
+    // Wait out the pause between activities: the answered one must be gone before reading the next.
+    await page.waitForFunction((el) => !el.isConnected, current, { timeout: 15_000 });
     if (step < total - 1) await expect(page.locator('.dot.filled')).toHaveCount(step + 1);
   }
   await expect(page.locator('.done')).toBeVisible();

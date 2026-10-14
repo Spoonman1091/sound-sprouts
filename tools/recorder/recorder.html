@@ -43,7 +43,7 @@
     <ul>
       <li>Use a quiet room and keep the mic about a hand's width from your mouth.</li>
       <li>For letter sounds, say <strong>only the sound</strong>. Hold s and n for about a second; keep t and p short and whispered.</li>
-      <li>Press <strong>Record</strong>, say the sound, then press <strong>Stop</strong> (it stops by itself after 4 seconds).</li>
+      <li>Press <strong>Record</strong>, say the sound, then press <strong>Stop</strong> (it stops by itself after 10 seconds).</li>
       <li>Listen to the take. If you like it, press <strong>Save</strong>; the saved version is trimmed, levelled, and played back.</li>
     </ul>
   </div>
@@ -51,7 +51,7 @@
   <div id="clips"></div>
 </main>
 <script type="module">
-const MAX_TAKE_MS = 4000;
+const MAX_TAKE_MS = 10000;
 const clipsEl = document.getElementById('clips');
 const globalError = document.getElementById('global-error');
 let streamPromise = null;
