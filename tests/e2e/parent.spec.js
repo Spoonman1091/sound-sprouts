@@ -56,10 +56,22 @@ test('a parent can mark letters mastered: they bloom and the next letter opens',
   await openParentDashboard(page);
   page.on('dialog', (dialog) => dialog.accept());
   for (const row of [0, 1]) {
-    await page.locator('tbody tr').nth(row).getByRole('button', { name: 'Mark mastered' }).click();
-    await expect(page.locator('tbody tr').nth(row)).toContainText('Mastered');
+    await page.locator('.letters tbody tr').nth(row).getByRole('button', { name: 'Mark mastered' }).click();
+    await expect(page.locator('.letters tbody tr').nth(row)).toContainText('Mastered');
   }
   await page.getByRole('button', { name: 'Back to the garden' }).click();
   await expect(page.locator('.plot[data-letter="s"]')).toHaveAttribute('data-status', 'flower');
   await expect(page.locator('.plot[data-letter="t"]')).toHaveAttribute('data-status', 'sprout');
+});
+
+test('a parent can mark a sight word mastered', async ({ page }) => {
+  await page.goto('/');
+  await openParentDashboard(page);
+  page.on('dialog', (dialog) => dialog.accept());
+  const row = page.locator('.sight-words tbody tr').first();
+  await row.getByRole('button', { name: 'Mark mastered' }).click();
+  await expect(row).toContainText('Mastered');
+  await expect(row.getByRole('button')).toHaveCount(0);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sound-sprouts:v1')));
+  expect(saved.items['sight:the'].masteredAt).toBeGreaterThan(0);
 });

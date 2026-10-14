@@ -4,7 +4,7 @@ import { LETTER_ORDER, RHYME_SETS, SIGHT_WORDS } from '../curriculum/units.js';
 import { letterStatus } from '../curriculum/unlock.js';
 import { validateChildName } from '../state/name.js';
 import { isMastered } from '../state/progress.js';
-import { STATUS_LABELS, firstTryRate, practiceList, sessionsInLastDays, rhymesMastered, sightWordsMastered } from './report.js';
+import { STATUS_LABELS, firstTryRate, practiceList, sessionsInLastDays, rhymesMastered, sightWordsMastered, sightWordStatus } from './report.js';
 
 const STORAGE_NOTICES = Object.freeze({
   reset: "Saved progress couldn't be read, so Sound Sprouts started fresh.",
@@ -23,28 +23,44 @@ function nameSection(progress, onSaveName) {
   return el('section', {}, [el('h2', {}, ['Child’s name']), el('label', { for: 'child-name' }, ['Shown only on this tablet']), input, error, save]);
 }
 
-function markButton(letter, { confirmFn, onMarkMastered }) {
+function markButton(label, confirmFn, onConfirm) {
   const button = el('button', {}, ['Mark mastered']);
   button.addEventListener('click', () => {
-    if (confirmFn(`Mark “${letter}” as mastered? It will still come back now and then for review.`)) onMarkMastered(letter);
+    if (confirmFn(`Mark “${label}” as mastered? It will still come back now and then for review.`)) onConfirm();
   });
   return button;
 }
 
-function lettersSection(progress, handlers) {
-  const rows = LETTER_ORDER.map((letter) => {
-    const rate = firstTryRate(progress, `ls:${letter}`);
-    return el('tr', {}, [
-      el('td', {}, [letter]),
-      el('td', {}, [STATUS_LABELS[letterStatus(progress, letter)]]),
-      el('td', {}, [rate === null ? '—' : `${rate}%`]),
-      el('td', {}, [isMastered(progress, `ls:${letter}`) ? null : markButton(letter, handlers)]),
-    ]);
-  });
-  return el('section', {}, [el('h2', {}, ['Letter sounds']), el('table', {}, [
-    el('thead', {}, [el('tr', {}, [el('th', {}, ['Letter']), el('th', {}, ['Status']), el('th', {}, ['First-try']), el('th', {}, [''])])]),
-    el('tbody', {}, rows),
-  ])]);
+const statusTable = (cls, heading, firstColumn, rows) => el('section', {}, [el('h2', {}, [heading]), el('table', { class: cls }, [
+  el('thead', {}, [el('tr', {}, [el('th', {}, [firstColumn]), el('th', {}, ['Status']), el('th', {}, ['First-try']), el('th', {}, [''])])]),
+  el('tbody', {}, rows),
+])]);
+
+const statusRow = (label, status, rate, button) => el('tr', {}, [
+  el('td', {}, [label]),
+  el('td', {}, [STATUS_LABELS[status]]),
+  el('td', {}, [rate === null ? '—' : `${rate}%`]),
+  el('td', {}, [button]),
+]);
+
+function lettersSection(progress, { confirmFn, onMarkMastered }) {
+  const rows = LETTER_ORDER.map((letter) => statusRow(
+    letter,
+    letterStatus(progress, letter),
+    firstTryRate(progress, `ls:${letter}`),
+    isMastered(progress, `ls:${letter}`) ? null : markButton(letter, confirmFn, () => onMarkMastered(letter)),
+  ));
+  return statusTable('letters', 'Letter sounds', 'Letter', rows);
+}
+
+function sightWordsSection(progress, { confirmFn, onMarkSightWordMastered }) {
+  const rows = Object.entries(SIGHT_WORDS).map(([id, text]) => statusRow(
+    text,
+    sightWordStatus(progress, id),
+    firstTryRate(progress, `sight:${id}`),
+    isMastered(progress, `sight:${id}`) ? null : markButton(text, confirmFn, () => onMarkSightWordMastered(id)),
+  ));
+  return statusTable('sight-words', 'Sight words', 'Word', rows);
 }
 
 function noticesSection(state, onDismissNotice) {
@@ -58,7 +74,7 @@ function noticesSection(state, onDismissNotice) {
   ].filter(Boolean);
 }
 
-export function renderDashboard(container, { state, now = Date.now, confirmFn = (m) => window.confirm(m), onSaveName, onReset, onPrint, onDone, onDismissNotice, onMarkMastered }) {
+export function renderDashboard(container, { state, now = Date.now, confirmFn = (m) => window.confirm(m), onSaveName, onReset, onPrint, onDone, onDismissNotice, onMarkMastered, onMarkSightWordMastered }) {
   const { progress } = state;
   const practice = practiceList(progress);
   const action = (label, handler, cls = '') => {
@@ -71,6 +87,7 @@ export function renderDashboard(container, { state, now = Date.now, confirmFn = 
     ...noticesSection(state, onDismissNotice),
     nameSection(progress, onSaveName),
     lettersSection(progress, { confirmFn, onMarkMastered }),
+    sightWordsSection(progress, { confirmFn, onMarkSightWordMastered }),
     el('section', {}, [
       el('h2', {}, ['This week']),
       el('p', {}, [`${sessionsInLastDays(progress, 7, now())} sessions in the last 7 days · ${rhymesMastered(progress)} of ${RHYME_SETS.length} rhyme sets mastered · ${sightWordsMastered(progress)} of ${Object.keys(SIGHT_WORDS).length} sight words mastered`]),

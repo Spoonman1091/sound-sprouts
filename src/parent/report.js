@@ -34,5 +34,11 @@ export const sessionsInLastDays = (progress, days, now) =>
 export const rhymesMastered = (progress) =>
   RHYME_SETS.filter((_, i) => isMastered(progress, `rhyme:${i}`)).length;
 
+export function sightWordStatus(progress, id) {
+  const itemId = `sight:${id}`;
+  if (isMastered(progress, itemId)) return isStruggling(progress, itemId) ? 'thirsty' : 'flower';
+  return progress.items[itemId]?.attempts.length ? 'sprout' : 'seed';
+}
+
 export const sightWordsMastered = (progress) =>
   Object.keys(SIGHT_WORDS).filter((w) => isMastered(progress, `sight:${w}`)).length;

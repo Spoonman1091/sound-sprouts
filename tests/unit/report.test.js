@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createProgress, recordAttempt, recordSession } from '../../src/state/progress.js';
-import { firstTryRate, describeItem, practiceList, sessionsInLastDays, rhymesMastered, sightWordsMastered } from '../../src/parent/report.js';
+import { firstTryRate, describeItem, practiceList, sessionsInLastDays, rhymesMastered, sightWordsMastered, sightWordStatus } from '../../src/parent/report.js';
 import { CONFIG } from '../../src/config.js';
 import { withMastered } from '../helpers.js';
 
@@ -36,4 +36,14 @@ describe('report', () => {
     expect(rhymesMastered(withMastered(undefined, ['rhyme:0', 'rhyme:3']))).toBe(2);
     expect(sightWordsMastered(withMastered(undefined, ['sight:the', 'sight:i']))).toBe(2);
   });
+
+  it('gives each sight word a garden-style status', () => {
+    expect(sightWordStatus(createProgress(), 'the')).toBe('seed');
+    const tried = recordAttempt(createProgress(), { itemId: 'sight:the', firstTry: true, sessionId: 's', at: 1 });
+    expect(sightWordStatus(tried, 'the')).toBe('sprout');
+    expect(sightWordStatus(withMastered(undefined, ['sight:the']), 'the')).toBe('flower');
+    const struggling = [2, 3].reduce((acc, at) => recordAttempt(acc, { itemId: 'sight:the', firstTry: false, sessionId: 's', at }), withMastered(undefined, ['sight:the']));
+    expect(sightWordStatus(struggling, 'the')).toBe('thirsty');
+  });
 });
+

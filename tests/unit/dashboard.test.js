@@ -16,7 +16,7 @@ const button = (root, text) => [...root.querySelectorAll('button')].find((b) => 
 describe('renderDashboard', () => {
   it('shows a row per letter with status', () => {
     const { root } = render({ progress: withMastered(undefined, ['ls:s']) });
-    const rows = [...root.querySelectorAll('tbody tr')].map((tr) => tr.textContent);
+    const rows = [...root.querySelectorAll('.letters tbody tr')].map((tr) => tr.textContent);
     expect(rows).toHaveLength(LETTER_ORDER.length);
     expect(rows[0]).toContain('Mastered');
     expect(rows[1]).toContain('Learning');
@@ -78,19 +78,39 @@ describe('renderDashboard', () => {
 
   it('offers "Mark mastered" only for letters not yet mastered', () => {
     const { root } = render({ progress: withMastered(undefined, ['ls:s']) });
-    const rows = [...root.querySelectorAll('tbody tr')];
+    const rows = [...root.querySelectorAll('.letters tbody tr')];
     expect(rows[0].querySelector('button')).toBeNull();
     expect(rows[1].querySelector('button').textContent).toBe('Mark mastered');
   });
 
   it('marks a letter mastered only after the parent confirms', () => {
     const yes = render({}, { onMarkMastered: vi.fn(), confirmFn: vi.fn(() => true) });
-    yes.root.querySelectorAll('tbody tr')[1].querySelector('button').click();
+    yes.root.querySelectorAll('.letters tbody tr')[1].querySelector('button').click();
     expect(yes.h.confirmFn).toHaveBeenCalledWith(expect.stringContaining('“a”'));
     expect(yes.h.onMarkMastered).toHaveBeenCalledWith('a');
     const no = render({}, { onMarkMastered: vi.fn(), confirmFn: vi.fn(() => false) });
-    no.root.querySelectorAll('tbody tr')[1].querySelector('button').click();
+    no.root.querySelectorAll('.letters tbody tr')[1].querySelector('button').click();
     expect(no.h.onMarkMastered).not.toHaveBeenCalled();
+  });
+
+  it('lists the sight words as written, with status, and offers "Mark mastered" for unmastered ones', () => {
+    const { root } = render({ progress: withMastered(undefined, ['sight:the']) });
+    const rows = [...root.querySelectorAll('.sight-words tbody tr')];
+    expect(rows.map((tr) => tr.cells[0].textContent)).toEqual(['the', 'I', 'a', 'is']);
+    expect(rows[0].textContent).toContain('Mastered');
+    expect(rows[1].textContent).toContain('Not started');
+    expect(rows[0].querySelector('button')).toBeNull();
+    expect(rows[1].querySelector('button').textContent).toBe('Mark mastered');
+  });
+
+  it('marks a sight word mastered only after the parent confirms', () => {
+    const yes = render({}, { onMarkSightWordMastered: vi.fn(), confirmFn: vi.fn(() => true) });
+    yes.root.querySelectorAll('.sight-words tbody tr')[1].querySelector('button').click();
+    expect(yes.h.confirmFn).toHaveBeenCalledWith(expect.stringContaining('“I”'));
+    expect(yes.h.onMarkSightWordMastered).toHaveBeenCalledWith('i');
+    const no = render({}, { onMarkSightWordMastered: vi.fn(), confirmFn: vi.fn(() => false) });
+    no.root.querySelectorAll('.sight-words tbody tr')[1].querySelector('button').click();
+    expect(no.h.onMarkSightWordMastered).not.toHaveBeenCalled();
   });
 });
 
