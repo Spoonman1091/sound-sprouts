@@ -33,3 +33,20 @@ test('corrupted saved data starts fresh and tells the parent', async ({ page }) 
   await openParentDashboard(page);
   await expect(page.locator('.notice').first()).toContainText('started fresh');
 });
+
+test('a long name fits on screen without sideways scrolling', async ({ page }) => {
+  await page.goto('/');
+  await openParentDashboard(page);
+  await page.locator('#child-name').fill('Maximilianna');
+  await page.getByRole('button', { name: 'Save name' }).click();
+  await page.getByRole('button', { name: 'Back to the garden' }).click();
+  await page.getByRole('button', { name: 'Play' }).click();
+  await page.locator('.name-spell').waitFor();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(overflow).toBe(false);
+  const viewport = page.viewportSize();
+  for (const slot of await page.locator('.slot').all()) {
+    const box = await slot.boundingBox();
+    expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+  }
+});
