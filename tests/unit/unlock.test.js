@@ -13,7 +13,7 @@ describe('unlockedLetters', () => {
   });
 
   it('opens everything when all are mastered', () => {
-    const all = ['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w'];
+    const all = ['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q'];
     expect(unlockedLetters(withMastered(undefined, all.map((l) => `ls:${l}`)))).toEqual(all);
   });
 });

@@ -82,10 +82,17 @@ describe('buildTask', () => {
     });
   });
 
-  it.each([1, 2, 3, 4, 5, 6, 7, 8])('first-sound /k/ distractors never start with c or k (seed %i)', (seed) => {
-    ['c', 'k'].forEach((target) => {
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])('never offers c or k against q (seed %i)', (seed) => {
+    const all = withMastered(undefined, LETTER_ORDER.map((l) => `ls:${l}`));
+    const ids = buildTask('ls:q', { progress: all, rng: seededRng(seed) }).choices.map((c) => c.id);
+    expect(ids).not.toContain('c');
+    expect(ids).not.toContain('k');
+  });
+
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])('first-sound /k/ and /kw/ distractors never start with c, k or q (seed %i)', (seed) => {
+    ['c', 'k', 'q'].forEach((target) => {
       const task = buildTask(`fs:${target}`, { progress: fresh, rng: seededRng(seed) });
-      task.choices.filter((c) => !c.correct).forEach((c) => expect(['c', 'k']).not.toContain(c.id[0]));
+      task.choices.filter((c) => !c.correct).forEach((c) => expect(['c', 'k', 'q']).not.toContain(c.id[0]));
     });
   });
 
@@ -93,7 +100,7 @@ describe('buildTask', () => {
     expect(buildTask('ls:s', { progress: fresh, rng: seededRng(1) }).cheer).toMatch(/assets\/audio\/prompt\/great_job_\d\.mp3/);
   });
 
-  it.each(['zzz:1', 'fs:i', 'fs:q', 'rhyme:99', 'blend:zap', 'ls:z', 'name'])('throws for unknown item %s', (id) => {
+  it.each(['zzz:1', 'fs:i', 'fs:x', 'rhyme:99', 'blend:zap', 'ls:1', 'name'])('throws for unknown item %s', (id) => {
     expect(() => buildTask(id, { progress: fresh, rng: seededRng(1) })).toThrow();
   });
 });

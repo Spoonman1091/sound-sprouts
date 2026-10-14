@@ -24,6 +24,10 @@ const PHONEMES = [
   { id: 'j', label: 'j', example: 'jellyfish', tip: 'Short, as at the start of "jellyfish" — keep the "uh" as tiny as you can.' },
   { id: 'v', label: 'v', example: 'volcano', tip: 'Like f but buzzy: hold "vvv" for about a second — no "vuh".' },
   { id: 'w', label: 'w', example: 'worm', tip: 'Round your lips and glide "ww" — no "wuh", and not the letter name.' },
+  { id: 'x', label: 'x', example: 'fox', tip: 'The "ks" at the end of "fox" — quick and whispered, not the letter name "ex".' },
+  { id: 'y', label: 'y', example: 'yo-yo', tip: 'The start of "yo-yo": a quick "yy" glide — no "yuh", and not the letter name.' },
+  { id: 'z', label: 'z', example: 'zebra', tip: 'A buzzing "zzz", held for about a second — no "zuh", and not "zee".' },
+  { id: 'q', label: 'q (qu)', example: 'queen', tip: 'q always comes with u: say "kw", as at the start of "queen". Quick and whispered.' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';

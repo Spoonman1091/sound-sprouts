@@ -2,8 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS, soundsAlike } from '../../src/curriculum/units.js';
 
 describe('curriculum data', () => {
-  it('teaches s a t p, i n m d, g o c k, e u h r, f b, l j v w in order', () => {
-    expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w']);
+  it('teaches s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q in order', () => {
+    expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q']);
+    expect([...LETTER_ORDER].sort().join('')).toBe('abcdefghijklmnopqrstuvwxyz');
+    ['y', 'z'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
+    expect(FIRST_SOUND_WORDS.q).toEqual(['queen']);
+    expect(FIRST_SOUND_WORDS.x).toBeUndefined();
+    expect(BLEND_WORDS).toEqual(expect.arrayContaining(['fox', 'box', 'six']));
     ['l', 'j', 'v', 'w'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
     expect(BLEND_WORDS).toEqual(expect.arrayContaining(['log', 'leg', 'web']));
     ['h', 'r', 'f', 'b'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
@@ -23,9 +28,14 @@ describe('curriculum data', () => {
     });
   });
 
-  it('treats c and k as the same sound, and nothing else', () => {
+  it('treats c, k and q ("kw") as sounding alike, and nothing else', () => {
     expect(soundsAlike('c', 'k')).toBe(true);
     expect(soundsAlike('k', 'c')).toBe(true);
+    ['c', 'k'].forEach((l) => {
+      expect(soundsAlike('q', l)).toBe(true);
+      expect(soundsAlike(l, 'q')).toBe(true);
+    });
+    expect(soundsAlike('q', 'w')).toBe(false);
     expect(soundsAlike('c', 'c')).toBe(true);
     expect(soundsAlike('c', 'g')).toBe(false);
   });
