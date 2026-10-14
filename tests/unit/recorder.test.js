@@ -29,7 +29,7 @@ describe('recording clips', () => {
     expect(RECORDING_GROUPS[2]).toMatchObject({ title: 'Sight words', optional: false });
     expect(RECORDING_GROUPS[2].clips.map((c) => c.label)).toEqual(['the', 'I', 'a', 'is']);
     const ids = (kind) => RECORDING_CLIPS.filter((c) => c.kind === kind).map((c) => c.id);
-    expect(ids('phoneme')).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q', 'sh', 'ch', 'th', 'ng', 'ee', 'oo', 'ai', 'oa', 'ar', 'or']);
+    expect(ids('phoneme')).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q', 'sh', 'ch', 'th', 'ng', 'ee', 'oo', 'ai', 'oa', 'ar', 'or', 'ur', 'ow', 'oi']);
     expect(ids('prompt').sort()).toEqual([...PROMPT_IDS].sort());
     expect(ids('word').sort()).toEqual([...PICTURE_WORDS, ...Object.keys(SIGHT_WORDS)].sort());
     expect(ids('letter')).toHaveLength(26);

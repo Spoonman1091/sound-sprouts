@@ -38,6 +38,9 @@ const PHONEMES = [
   { id: 'oa', label: 'oa', example: 'goat', tip: 'A long "oh", as in "goat", held for about a second.' },
   { id: 'ar', label: 'ar', example: 'car', tip: 'The "ar" in "car" — open wide, like at the doctor\'s, about a second.' },
   { id: 'or', label: 'or', example: 'fork', tip: 'The "or" in "fork", held for about a second.' },
+  { id: 'ur', label: 'ur', example: 'fur', tip: 'The "ur" in "fur", held for about a second.' },
+  { id: 'ow', label: 'ow', example: 'cow', tip: 'The "ow" in "cow" (like when you bump your knee), not the "oh" in "snow".' },
+  { id: 'oi', label: 'oi', example: 'coin', tip: 'The "oi" in "coin", as in "oink" without the "nk".' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';

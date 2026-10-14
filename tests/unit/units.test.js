@@ -4,7 +4,7 @@ import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS
 describe('curriculum data', () => {
   it('teaches s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q in order', () => {
     expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q',
-      'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or']);
+      'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or', 'ur', 'ow', 'oi']);
     expect(LETTER_ORDER.filter((l) => l.length === 1).sort().join('')).toBe('abcdefghijklmnopqrstuvwxyz');
     ['y', 'z'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
     expect(FIRST_SOUND_WORDS.q).toEqual(['queen']);
@@ -80,12 +80,21 @@ describe('curriculum data', () => {
   });
 
   it('ends with the vowel teams oa ar or, practised through blends', () => {
-    expect(LETTER_ORDER.slice(-3)).toEqual(['oa', 'ar', 'or']);
+    expect(LETTER_ORDER.slice(34, 37)).toEqual(['oa', 'ar', 'or']);
     ['oa', 'ar', 'or'].forEach((v) => expect(FIRST_SOUND_WORDS[v]).toBeUndefined());
     expect(BLEND_WORDS).toEqual(expect.arrayContaining(['goat', 'boat', 'coat', 'soap', 'car', 'star', 'yarn', 'jar', 'arm', 'cart', 'corn', 'fork']));
   });
 
+  it('ends with the vowel teams ur ow oi, practised through blends', () => {
+    expect(LETTER_ORDER.slice(-3)).toEqual(['ur', 'ow', 'oi']);
+    ['ur', 'ow', 'oi'].forEach((v) => expect(FIRST_SOUND_WORDS[v]).toBeUndefined());
+    expect(BLEND_WORDS).toEqual(expect.arrayContaining(['church', 'surf', 'cow', 'owl', 'crown', 'clown', 'coin', 'toilet', 'point']));
+  });
+
   it('keeps vowel teams together when splitting words', () => {
+    expect(graphemes('church')).toEqual(['ch', 'ur', 'ch']);
+    expect(graphemes('owl')).toEqual(['ow', 'l']);
+    expect(graphemes('toilet')).toEqual(['t', 'oi', 'l', 'e', 't']);
     expect(graphemes('coat')).toEqual(['c', 'oa', 't']);
     expect(graphemes('star')).toEqual(['s', 't', 'ar']);
     expect(graphemes('fork')).toEqual(['f', 'or', 'k']);

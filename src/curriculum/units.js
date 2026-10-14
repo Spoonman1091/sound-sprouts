@@ -1,7 +1,7 @@
 // Letter order follows common synthetic-phonics programmes: s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q,
-// then the digraphs sh ch th ng ck (two letters, one sound), then the vowel teams ee oo ai, oa ar or.
+// then the digraphs sh ch th ng ck (two letters, one sound), then the vowel teams ee oo ai, oa ar or, ur ow oi.
 export const LETTER_ORDER = Object.freeze(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q',
-  'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or']);
+  'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or', 'ur', 'ow', 'oi']);
 
 const DIGRAPHS = Object.freeze(LETTER_ORDER.filter((l) => l.length === 2));
 
@@ -78,9 +78,10 @@ export const BLEND_WORDS = Object.freeze(['pin', 'tap', 'pan', 'tin', 'sip', 'na
   'fish', 'ship', 'chick', 'duck', 'sock', 'rock', 'bath', 'ring',
   // Longer words with consonant blends.
   'frog', 'stop', 'hand', 'crab', 'drum', 'flag', 'milk', 'clock', 'plant', 'nest', 'tent', 'gift',
-  // Vowel teams (oo as in moon).
+  // Vowel teams (oo as in moon, ow as in cow).
   'bee', 'tree', 'sheep', 'three', 'moon', 'spoon', 'tooth', 'boot', 'broom', 'rain', 'snail', 'train', 'chain',
-  'goat', 'boat', 'coat', 'soap', 'car', 'star', 'yarn', 'jar', 'arm', 'cart', 'corn', 'fork']);
+  'goat', 'boat', 'coat', 'soap', 'car', 'star', 'yarn', 'jar', 'arm', 'cart', 'corn', 'fork',
+  'church', 'surf', 'cow', 'owl', 'crown', 'clown', 'coin', 'toilet', 'point']);
 
 export const PICTURE_WORDS = Object.freeze([
   ...new Set([...Object.values(FIRST_SOUND_WORDS).flat(), ...RHYME_SETS.flat(), ...BLEND_WORDS]),
