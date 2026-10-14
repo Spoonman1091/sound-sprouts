@@ -138,7 +138,7 @@ function renderClip(clip, onSaved) {
     save.disabled = true;
     setStatus('Saving…');
     try {
-      const res = await fetch(`/save/${clip.kind}/${clip.id}`, { method: 'POST', body: take });
+      const res = await fetch(`/save/${clip.kind}/${clip.id}`, { method: 'POST', body: take, headers: { 'X-Recorder': '1' } });
       const body = await res.json();
       if (!body.ok) throw new Error(body.error);
       setStatus('Saved ✓', 'done');

@@ -51,7 +51,26 @@ async function handleSave(req, res, clip, deps) {
   }
 }
 
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
+const hostnameOf = (value) => {
+  try {
+    return new URL(`http://${value}`).hostname;
+  } catch {
+    return '';
+  }
+};
+
+// Only our own page may talk to us: blocks DNS rebinding (Host) and cross-site writes (Origin + custom header,
+// which forces a CORS preflight that this server never approves).
+function isTrusted(req) {
+  if (!LOCAL_HOSTNAMES.has(hostnameOf(req.headers.host ?? ''))) return false;
+  const { origin } = req.headers;
+  if (origin && !LOCAL_HOSTNAMES.has(hostnameOf(origin.replace(/^https?:\/\//, '')))) return false;
+  return req.method !== 'POST' || req.headers['x-recorder'] === '1';
+}
+
 async function route(req, res, deps) {
+  if (!isTrusted(req)) return send(res, 403, { ok: false, error: 'Forbidden.' });
   const [, action = '', rawKind = '', rawId = ''] = new URL(req.url, 'http://localhost').pathname.split('/');
   const clip = findClip(decodeURIComponent(rawKind), decodeURIComponent(rawId));
   if (req.method === 'GET' && action === '' && rawKind === '') return send(res, 200, await deps.readPage(), 'text/html; charset=utf-8');
@@ -101,7 +120,7 @@ function convertToMp3(clip, input) {
     const raw = join(dir, 'take');
     const mp3 = join(dir, 'clip.mp3');
     writeFileSync(raw, input);
-    const result = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', raw, '-af', CLEAN_FILTER, '-ac', '1', '-ar', '44100', '-b:a', '96k', mp3], { encoding: 'utf8' });
+    const result = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-protocol_whitelist', 'file', '-i', raw, '-af', CLEAN_FILTER, '-ac', '1', '-ar', '44100', '-b:a', '96k', mp3], { encoding: 'utf8' });
     if (result.status !== 0) throw new Error(result.stderr || 'ffmpeg failed');
     mkdirSync(`${AUDIO_DIR}/${clip.kind}`, { recursive: true });
     copyFileSync(mp3, clipPath(clip));

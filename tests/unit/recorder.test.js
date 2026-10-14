@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import { request } from 'node:http';
 import { createRecorderServer, MAX_UPLOAD_BYTES } from '../../tools/recorder/server.mjs';
 import { RECORDING_GROUPS, RECORDING_CLIPS, findClip } from '../../tools/recorder/clips.mjs';
 import { selectJobs } from '../../tools/build-audio.mjs';
@@ -43,6 +44,16 @@ describe('recording clips', () => {
   });
 });
 
+const post = (url, body, headers = {}) => fetch(url, { method: 'POST', body, headers: { 'X-Recorder': '1', ...headers } });
+
+function rawGet(base, path, host) {
+  const { port } = new URL(base);
+  return new Promise((resolve, reject) => {
+    request({ host: '127.0.0.1', port, path, headers: { Host: host } }, (res) => { res.resume(); resolve(res.statusCode); })
+      .on('error', reject).end();
+  });
+}
+
 describe('recorder server', () => {
   it('serves the recorder page', async () => {
     const { base } = await start();
@@ -61,29 +72,29 @@ describe('recorder server', () => {
 
   it('saves an upload for a known clip', async () => {
     const { base, deps } = await start();
-    const res = await fetch(`${base}/save/prompt/try_again`, { method: 'POST', body: new Uint8Array([9, 9]) });
+    const res = await post(`${base}/save/prompt/try_again`, new Uint8Array([9, 9]));
     expect(await res.json()).toEqual({ ok: true });
     expect(deps.saveClip).toHaveBeenCalledWith(expect.objectContaining({ kind: 'prompt', id: 'try_again' }), Buffer.from([9, 9]));
   });
 
   it.each(['phoneme/zzz', 'prompt/s', '..%2Fevil/s', 'phoneme/..%2F..%2Fx', 'phoneme'])('rejects unknown clip %j', async (path) => {
     const { base, deps } = await start();
-    const res = await fetch(`${base}/save/${path}`, { method: 'POST', body: new Uint8Array([1]) });
+    const res = await post(`${base}/save/${path}`, new Uint8Array([1]));
     expect(res.status).toBe(404);
     expect(deps.saveClip).not.toHaveBeenCalled();
   });
 
   it('rejects empty and oversized uploads', async () => {
     const { base, deps } = await start();
-    expect((await fetch(`${base}/save/phoneme/s`, { method: 'POST', body: new Uint8Array(0) })).status).toBe(400);
-    const big = await fetch(`${base}/save/phoneme/s`, { method: 'POST', body: new Uint8Array(MAX_UPLOAD_BYTES + 1) });
+    expect((await post(`${base}/save/phoneme/s`, new Uint8Array(0))).status).toBe(400);
+    const big = await post(`${base}/save/phoneme/s`, new Uint8Array(MAX_UPLOAD_BYTES + 1));
     expect(big.status).toBe(413);
     expect(deps.saveClip).not.toHaveBeenCalled();
   });
 
   it('reports a failed conversion without crashing', async () => {
     const { base } = await start({ saveClip: vi.fn(async () => { throw new Error('ffmpeg exploded'); }) });
-    const res = await fetch(`${base}/save/phoneme/s`, { method: 'POST', body: new Uint8Array([1]) });
+    const res = await post(`${base}/save/phoneme/s`, new Uint8Array([1]));
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ ok: false, error: 'Could not process that recording. Try again.' });
   });
@@ -95,6 +106,26 @@ describe('recorder server', () => {
     expect([...new Uint8Array(await res.arrayBuffer())]).toEqual([1, 2, 3]);
     expect((await fetch(`${base}/audio/phoneme/a`)).status).toBe(404);
     expect((await fetch(`${base}/audio/phoneme/nope`)).status).toBe(404);
+  });
+
+  it('refuses saves without the recorder header (blocks cross-site simple POSTs)', async () => {
+    const { base, deps } = await start();
+    const res = await fetch(`${base}/save/phoneme/s`, { method: 'POST', body: new Uint8Array([1]) });
+    expect(res.status).toBe(403);
+    expect(deps.saveClip).not.toHaveBeenCalled();
+  });
+
+  it('refuses saves from another origin', async () => {
+    const { base, deps } = await start();
+    const res = await post(`${base}/save/phoneme/s`, new Uint8Array([1]), { Origin: 'https://evil.example' });
+    expect(res.status).toBe(403);
+    expect(deps.saveClip).not.toHaveBeenCalled();
+  });
+
+  it('refuses requests whose Host is not localhost (DNS rebinding)', async () => {
+    const { base } = await start();
+    expect(await rawGet(base, '/clips', 'evil.example:4174')).toBe(403);
+    expect(await rawGet(base, '/clips', 'localhost:4174')).toBe(200);
   });
 
   it('404s anything else', async () => {
