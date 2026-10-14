@@ -47,7 +47,8 @@ img { pointer-events: none; -webkit-user-drag: none; }
 @keyframes enter { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: none; } }
 .activity[data-ready="false"] > .choices, .activity[data-ready="false"] > .tiles { opacity: .6; transition: opacity .2s; }
 .replay { position: absolute; top: 0; left: 0; width: var(--tap); height: var(--tap); border-radius: 50%; background: var(--sun); font-size: 2.5rem; }
-.focus { width: min(30vw, 200px); }
+.focus { width: min(30vw, 200px); padding: 0; background: none; border-radius: 24px; }
+.focus img { width: 100%; display: block; }
 .choices { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(16px, 4vw, 48px); }
 .choice { width: clamp(140px, 26vw, 240px); aspect-ratio: 1; border-radius: 32px; background: var(--card); box-shadow: 0 8px 0 var(--shadow); display: grid; place-items: center; transition: opacity .3s, transform .2s; }
 .choice img { width: 75%; }

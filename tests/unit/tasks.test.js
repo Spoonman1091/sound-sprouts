@@ -15,6 +15,8 @@ describe('buildTask', () => {
     expect(task.activity).toBe('pickOne');
     expect(task.prompt).toEqual([prompt('which_rhymes_with'), word(target)]);
     expect(task.focusImg).toBe(`assets/img/${target}.svg`);
+    expect(task.focusAudio).toBe(word(target));
+    expect(task.focusLabel).toBe(target);
     expect(correctOf(task)).toHaveLength(1);
     expect(rhymes).toContain(correctOf(task)[0].id);
     expect(task.choices).toHaveLength(3);

@@ -122,5 +122,36 @@ describe('runPickOne', () => {
     await flush();
     expect(player.playSequence).toHaveBeenCalledOnce();
   });
+
+  it('says the picture word before cheering on a correct tap', async () => {
+    const root = document.createElement('div');
+    const player = fakePlayer();
+    const result = runPickOne(root, task, { player });
+    await flush();
+    choice(root, 'sun').click();
+    await result;
+    const clips = player.play.mock.calls.map(([src]) => src);
+    expect(clips).toEqual(['sun.mp3', 'cheer.mp3']);
+  });
+
+  it('tapping the big picture says its word without answering, only when ready', async () => {
+    const root = document.createElement('div');
+    const gate = deferred();
+    const player = fakePlayer({ playSequence: vi.fn(() => gate.promise) });
+    const done = vi.fn();
+    runPickOne(root, { ...task, focusImg: 'assets/img/cat.svg', focusAudio: 'cat.mp3', focusLabel: 'cat' }, { player }).then(done);
+    const focus = root.querySelector('button.focus');
+    expect(focus.getAttribute('aria-label')).toBe('cat');
+    focus.click();
+    await flush();
+    expect(player.play).not.toHaveBeenCalled();
+    gate.resolve({ ok: true });
+    await flush();
+    focus.click();
+    await flush();
+    expect(player.play).toHaveBeenCalledWith('cat.mp3');
+    expect(done).not.toHaveBeenCalled();
+    expect(root.querySelector('.activity').dataset.ready).toBe('true');
+  });
 });
 

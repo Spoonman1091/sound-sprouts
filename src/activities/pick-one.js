@@ -15,16 +15,18 @@ function renderPickOne(task) {
     'aria-label': choice.label,
     dataset: { choiceId: choice.id, correct: String(choice.correct) },
   }, [choiceFace(choice)]));
-  const focus = task.focusImg ? el('img', { class: 'focus', src: task.focusImg, alt: '' }) : null;
+  const focus = task.focusImg
+    ? el('button', { class: 'focus', 'aria-label': task.focusLabel ?? '' }, [el('img', { src: task.focusImg, alt: '' })])
+    : null;
   const root = el('div', { class: 'activity pick-one', dataset: { ready: 'false' } },
     [replay, focus, el('div', { class: 'choices' }, buttons)]);
-  return { root, replay, buttons };
+  return { root, replay, buttons, focus };
 }
 
 export function runPickOne(container, task, deps) {
   const { player } = deps;
   return new Promise((resolve) => {
-    const { root, replay, buttons } = renderPickOne(task);
+    const { root, replay, buttons, focus } = renderPickOne(task);
     let ready = false;
     let firstTry = true;
     const setReady = (value) => { ready = value; root.dataset.ready = String(value); };
@@ -45,9 +47,10 @@ export function runPickOne(container, task, deps) {
       await ask();
     };
 
-    const onRight = async (button) => {
+    const onRight = async (choice, button) => {
       setReady(false);
       button.classList.add('right');
+      if (choice.audio) await player.play(choice.audio);
       await player.play(task.cheer);
       resolve({ firstTry });
     };
@@ -55,10 +58,17 @@ export function runPickOne(container, task, deps) {
     buttons.forEach((button, index) => button.addEventListener('click', () => {
       if (!ready) return;
       const choice = task.choices[index];
-      if (choice.correct) onRight(button);
+      if (choice.correct) onRight(choice, button);
       else onWrong(choice, button);
     }));
     replay.addEventListener('click', () => { if (ready) ask(); });
+    // The big picture just says its word again; it is not an answer.
+    focus?.addEventListener('click', async () => {
+      if (!ready || !task.focusAudio) return;
+      setReady(false);
+      await player.play(task.focusAudio);
+      setReady(true);
+    });
 
     container.replaceChildren(root);
     settle(deps).then(ask);

@@ -21,6 +21,8 @@ function rhymeTask(index, rng) {
   return {
     activity: 'pickOne',
     focusImg: imgPath(target),
+    focusAudio: word(target),
+    focusLabel: target,
     prompt: [prompt('which_rhymes_with'), word(target)],
     choices: shuffle([pictureChoice(pick(rhymes, rng), true), ...pictureDistractors(others, rng)], rng),
   };
