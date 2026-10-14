@@ -7,7 +7,29 @@
   font-family: 'Andika', ui-rounded, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); overscroll-behavior: none; }
+html { color-scheme: light; background: var(--bg); }
+html, body { margin: 0; min-height: 100%; color: var(--ink); overscroll-behavior: none; }
+
+/* Garden scenery: sky fading to cream, a soft sun, rolling hills. Kept pale so activities stay the focus. */
+body {
+  min-height: 100dvh;
+  isolation: isolate; /* lets the cloud layer (z-index: -1) sit above the sky */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 200' preserveAspectRatio='none'%3E%3Cpath d='M0 110 C 220 40 420 50 640 105 S 1020 150 1200 80 V200 H0Z' fill='%23cdeabd'/%3E%3Cpath d='M0 150 C 260 100 470 120 720 145 S 1060 115 1200 140 V200 H0Z' fill='%23a9d99a'/%3E%3C/svg%3E") bottom / 100% 20vh no-repeat,
+    radial-gradient(circle at 90% 7%, #fff1b8 0 34px, rgba(255, 233, 160, .45) 35px 58px, transparent 90px),
+    linear-gradient(180deg, #d4ecf7 0%, #e7f4ee 38%, var(--bg) 72%);
+}
+body::before {
+  content: ''; position: fixed; inset: 0 0 auto 0; height: 40vh; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70px 22px at 18% 22%, rgba(255, 255, 255, .9) 60%, transparent 62%),
+    radial-gradient(ellipse 46px 26px at 21% 18%, rgba(255, 255, 255, .9) 60%, transparent 62%),
+    radial-gradient(ellipse 90px 24px at 62% 12%, rgba(255, 255, 255, .8) 60%, transparent 62%),
+    radial-gradient(ellipse 52px 28px at 65% 8%, rgba(255, 255, 255, .8) 60%, transparent 62%),
+    radial-gradient(ellipse 60px 18px at 40% 30%, rgba(255, 255, 255, .6) 60%, transparent 62%);
+  animation: drift 90s ease-in-out infinite alternate;
+}
+@keyframes drift { from { transform: translateX(-3vw); } to { transform: translateX(3vw); } }
 body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 button { font: inherit; color: inherit; border: none; cursor: pointer; }
 img { pointer-events: none; -webkit-user-drag: none; }
@@ -94,6 +116,8 @@ img { pointer-events: none; -webkit-user-drag: none; }
 /* Print: mini-book */
 .print-only { display: none; }
 @media print {
+  body { background: none; }
+  body::before { display: none; }
   .app { display: none; }
   .print-only { display: block; }
   .mb-title { text-align: center; }
