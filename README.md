@@ -1,5 +1,7 @@
 # Sound Sprouts 🌱
 
+**▶ Play it: [spoonman1091.github.io/sound-sprouts](https://spoonman1091.github.io/sound-sprouts/)**
+
 A free, ad-free phonics garden for young readers. Runs in a tablet browser, works offline, and stores progress only on the device.
 
 ## Use it
