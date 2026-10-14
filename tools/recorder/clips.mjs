@@ -1,11 +1,42 @@
-// The sounds a grown-up records for slice 1, with coaching tips shown on the recorder page.
-export const RECORDING_CLIPS = Object.freeze([
+// Everything a grown-up can record, grouped for the recorder page. Unrecorded clips keep the Piper voice.
+import { PROMPT_TEXT, LETTER_NAME_TEXT } from '../audio-script.mjs';
+import { PICTURE_WORDS } from '../../src/curriculum/units.js';
+
+const PHONEMES = [
   { id: 's', label: 's', example: 'sun', tip: 'Hiss like a snake, about one second: "sssss". No "suh".' },
   { id: 'a', label: 'a', example: 'apple', tip: 'Short a, as at the start of "apple". Not the letter name "ay".' },
   { id: 't', label: 't', example: 'tent', tip: 'A quick, whispered tongue tap: "t". No "tuh" — no voice after it.' },
   { id: 'p', label: 'p', example: 'pig', tip: 'A quick, whispered lip pop: "p". No "puh" — no voice after it.' },
   { id: 'i', label: 'i', example: 'itchy', tip: 'Short i, as at the start of "itchy". Not the letter name "eye".' },
   { id: 'n', label: 'n', example: 'nest', tip: 'Hum through your nose, about one second: "nnnnn". No "nuh".' },
+];
+
+const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';
+const PROMPT_TIPS = Object.freeze({
+  which_starts_with: LEAD_IN,
+  which_rhymes_with: LEAD_IN,
+  find_the_letter: LEAD_IN,
+});
+const promptTip = (id) => PROMPT_TIPS[id] ?? 'Say it warmly and a little slowly, the way you would talk to her.';
+
+export const RECORDING_GROUPS = Object.freeze([
+  { kind: 'phoneme', title: 'Letter sounds', optional: false, clips: PHONEMES },
+  {
+    kind: 'prompt', title: 'Instructions and praise', optional: false,
+    clips: Object.entries(PROMPT_TEXT).map(([id, text]) => ({ id, label: text, tip: promptTip(id) })),
+  },
+  {
+    kind: 'word', title: 'Picture words', optional: true,
+    clips: [...PICTURE_WORDS].sort().map((w) => ({ id: w, label: w, tip: 'Say the word clearly once, like naming the picture.' })),
+  },
+  {
+    kind: 'letter', title: 'Letter names (used when spelling her name)', optional: true,
+    clips: Object.keys(LETTER_NAME_TEXT).map((l) => ({ id: l, label: l.toUpperCase(), tip: `Say the letter's name, e.g. "${LETTER_NAME_TEXT[l].replace('.', '')}".` })),
+  },
 ]);
 
-export const findClip = (id) => RECORDING_CLIPS.find((clip) => clip.id === id) ?? null;
+export const RECORDING_CLIPS = Object.freeze(
+  RECORDING_GROUPS.flatMap((group) => group.clips.map((clip) => ({ ...clip, kind: group.kind }))),
+);
+
+export const findClip = (kind, id) => RECORDING_CLIPS.find((c) => c.kind === kind && c.id === id) ?? null;
