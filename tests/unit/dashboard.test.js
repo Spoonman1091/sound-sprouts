@@ -75,4 +75,22 @@ describe('renderDashboard', () => {
     const { root } = render({ progress: withMastered(undefined, ['sight:the']) });
     expect(root.textContent).toContain('1 of 4 sight words mastered');
   });
+
+  it('offers "Mark mastered" only for letters not yet mastered', () => {
+    const { root } = render({ progress: withMastered(undefined, ['ls:s']) });
+    const rows = [...root.querySelectorAll('tbody tr')];
+    expect(rows[0].querySelector('button')).toBeNull();
+    expect(rows[1].querySelector('button').textContent).toBe('Mark mastered');
+  });
+
+  it('marks a letter mastered only after the parent confirms', () => {
+    const yes = render({}, { onMarkMastered: vi.fn(), confirmFn: vi.fn(() => true) });
+    yes.root.querySelectorAll('tbody tr')[1].querySelector('button').click();
+    expect(yes.h.confirmFn).toHaveBeenCalledWith(expect.stringContaining('“a”'));
+    expect(yes.h.onMarkMastered).toHaveBeenCalledWith('a');
+    const no = render({}, { onMarkMastered: vi.fn(), confirmFn: vi.fn(() => false) });
+    no.root.querySelectorAll('tbody tr')[1].querySelector('button').click();
+    expect(no.h.onMarkMastered).not.toHaveBeenCalled();
+  });
 });
+

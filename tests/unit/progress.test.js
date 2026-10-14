@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CONFIG } from '../../src/config.js';
 import {
-  createProgress, recordAttempt, recordSession, isMastered, isStruggling, lastSeen, setChildName,
+  createProgress, recordAttempt, recordSession, isMastered, isStruggling, lastSeen, setChildName, markMastered,
 } from '../../src/state/progress.js';
 
 const attempt = (p, itemId, firstTry, sessionId, at) => recordAttempt(p, { itemId, firstTry, sessionId, at });
@@ -88,5 +88,21 @@ describe('lastSeen, recordSession, setChildName', () => {
     const before = createProgress();
     expect(setChildName(before, 'Ava').childName).toBe('Ava');
     expect(before.childName).toBe('');
+  });
+});
+
+describe('markMastered', () => {
+  it('masters an item without touching its attempts or the original', () => {
+    const before = attempt(createProgress(), 'ls:s', false, 'a', 1);
+    const after = markMastered(before, 'ls:s', 50);
+    expect(isMastered(after, 'ls:s')).toBe(true);
+    expect(after.items['ls:s'].attempts).toEqual(before.items['ls:s'].attempts);
+    expect(isMastered(before, 'ls:s')).toBe(false);
+  });
+
+  it('works for an item never tried, and keeps an earlier mastery date', () => {
+    expect(markMastered(createProgress(), 'ls:a', 7).items['ls:a']).toEqual({ attempts: [], masteredAt: 7 });
+    const mastered = markMastered(createProgress(), 'ls:a', 7);
+    expect(markMastered(mastered, 'ls:a', 99).items['ls:a'].masteredAt).toBe(7);
   });
 });

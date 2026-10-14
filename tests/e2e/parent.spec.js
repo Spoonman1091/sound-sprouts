@@ -50,3 +50,16 @@ test('a long name fits on screen without sideways scrolling', async ({ page }) =
     expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
   }
 });
+
+test('a parent can mark letters mastered: they bloom and the next letter opens', async ({ page }) => {
+  await page.goto('/');
+  await openParentDashboard(page);
+  page.on('dialog', (dialog) => dialog.accept());
+  for (const row of [0, 1]) {
+    await page.locator('tbody tr').nth(row).getByRole('button', { name: 'Mark mastered' }).click();
+    await expect(page.locator('tbody tr').nth(row)).toContainText('Mastered');
+  }
+  await page.getByRole('button', { name: 'Back to the garden' }).click();
+  await expect(page.locator('.plot[data-letter="s"]')).toHaveAttribute('data-status', 'flower');
+  await expect(page.locator('.plot[data-letter="t"]')).toHaveAttribute('data-status', 'sprout');
+});

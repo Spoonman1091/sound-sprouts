@@ -8,6 +8,7 @@ import { renderHome } from './screens/home.js';
 import { runSession } from './screens/session.js';
 import { renderDone } from './screens/done.js';
 import { createProgress, setChildName } from './state/progress.js';
+import { markLetterMastered } from './curriculum/unlock.js';
 import { renderGate } from './parent/gate.js';
 import { renderDashboard } from './parent/dashboard.js';
 import { renderMinibook } from './parent/minibook.js';
@@ -75,6 +76,7 @@ function showDashboard() {
     onReset: () => { save({ ...createProgress(), childName: state.progress.childName }); showDashboard(); },
     onPrint: () => { renderMinibook(document.getElementById('print'), state.progress); window.print(); },
     onDone: showHome,
+    onMarkMastered: (letter) => { save(markLetterMastered(state.progress, letter, Date.now())); showDashboard(); },
     onDismissNotice: () => { dismissUnreadable(storage); state = { ...state, storageStatus: 'loaded' }; showDashboard(); },
   });
 }

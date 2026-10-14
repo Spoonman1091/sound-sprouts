@@ -27,6 +27,12 @@ export function recordSession(progress, { sessionId, at, itemCount }) {
 
 export const isMastered = (progress, itemId) => Boolean(progress.items[itemId]?.masteredAt);
 
+// A grown-up vouching for something she already knows. Attempts are kept, so review still checks it.
+export function markMastered(progress, itemId, at) {
+  const previous = progress.items[itemId] ?? { attempts: [], masteredAt: null };
+  return { ...progress, items: { ...progress.items, [itemId]: { ...previous, masteredAt: previous.masteredAt ?? at } } };
+}
+
 export function isStruggling(progress, itemId) {
   const recent = attemptsOf(progress, itemId).slice(-CONFIG.STRUGGLE_WINDOW);
   return recent.filter((a) => !a.firstTry).length >= CONFIG.STRUGGLE_MISSES;
