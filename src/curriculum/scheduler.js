@@ -45,7 +45,7 @@ export function planSession(progress, rng = Math.random) {
     .slice(0, CONFIG.FOCUS_ITEMS);
   const rhymes = shuffle(rest.filter((id) => isRhyme(id) && !isMastered(progress, id)), rng)
     .slice(0, CONFIG.MAX_RHYMES_PER_SESSION);
-  const review = sortForReview(progress, rest.filter((id) => !focus.includes(id) && !rhymes.includes(id)));
-  const body = interleave([...focus, ...focus], [...rhymes, ...review]);
+  const review = sortForReview(progress, rest.filter((id) => isMastered(progress, id)));
+  const body = [...interleave(focus, rhymes), ...focus, ...review];
   return dedupeAdjacent([warmup, ...body]).slice(0, CONFIG.SESSION_LENGTH);
 }

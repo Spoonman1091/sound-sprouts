@@ -28,7 +28,7 @@ describe('runSession', () => {
     expect(saves[0].items['rhyme:0'].attempts).toHaveLength(1);
     expect(saves[1].items['ls:s'].attempts[0]).toMatchObject({ firstTry: false, sessionId: 'sess-1' });
     expect(result.sessions).toEqual([{ sessionId: 'sess-1', at: 104, itemCount: 3 }]);
-    expect(container.querySelectorAll('.dot.done')).toHaveLength(3);
+    expect(container.querySelectorAll('.dot.filled')).toHaveLength(3);
   });
 
   it('keeps completed items saved if the session is abandoned mid-way', async () => {

@@ -59,6 +59,21 @@ describe('planSession', () => {
     plan.forEach((id, i) => expect(id).not.toBe(plan[i - 1]));
   });
 
+  it.each([1, 2, 3, 4, 5])('fresh session (seed %i) caps rhymes and repeats focus items', (seed) => {
+    const plan = planSession(createProgress(), seededRng(seed));
+    const rhymes = plan.filter((id) => id.startsWith('rhyme:'));
+    expect(rhymes.length).toBeLessThanOrEqual(1 + CONFIG.MAX_RHYMES_PER_SESSION);
+    expect(plan).toHaveLength(CONFIG.SESSION_LENGTH);
+    expect(new Set(plan.filter((id) => !id.startsWith('rhyme:'))).size).toBeLessThan(plan.length - rhymes.length);
+  });
+
+  it('review only brings back mastered items, never extra unmastered rhymes', () => {
+    const p = withMastered(undefined, ['ls:s', 'fs:s', 'rhyme:0']);
+    const plan = planSession(p, seededRng(6));
+    const unmasteredRhymes = plan.filter((id) => id.startsWith('rhyme:') && id !== 'rhyme:0');
+    expect(unmasteredRhymes.length).toBeLessThanOrEqual(CONFIG.MAX_RHYMES_PER_SESSION + 1);
+  });
+
   it('warms up with the name when it is not mastered yet', () => {
     expect(planSession(setChildName(createProgress(), 'Ava'), seededRng(1))[0]).toBe('name');
   });

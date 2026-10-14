@@ -10,7 +10,7 @@ function renderShell(container, total) {
     el('div', { class: 'dots', 'aria-hidden': 'true' }, dots),
     stage,
   ]));
-  return { stage, markDone: (index) => dots[index].classList.add('done') };
+  return { stage, markDone: (index) => dots[index].classList.add('filled') };
 }
 
 export async function runSession({ container, progress, planIds, sessionId, deps, save, now = Date.now, rng = Math.random }) {
