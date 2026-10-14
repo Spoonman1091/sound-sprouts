@@ -65,11 +65,16 @@ export const RHYME_SETS = Object.freeze([
   ['moon', 'spoon'],
 ]);
 
+// More than three sounds, e.g. f-r-o-g.
+export const isLongWord = (w) => graphemes(w).length > 3;
+
 export const BLEND_WORDS = Object.freeze(['pin', 'tap', 'pan', 'tin', 'sip', 'nap', 'dog', 'pig', 'map', 'sad', 'man',
   'cat', 'cap', 'pen', 'ten', 'sun', 'nut', 'cup',
   'hat', 'bag', 'bed', 'bus', 'bug', 'log', 'leg', 'web',
   'fox', 'box', 'six',
-  'fish', 'ship', 'chick', 'duck', 'sock', 'rock', 'bath', 'ring']);
+  'fish', 'ship', 'chick', 'duck', 'sock', 'rock', 'bath', 'ring',
+  // Longer words with consonant blends.
+  'frog', 'stop', 'hand', 'crab', 'drum', 'flag', 'milk', 'clock', 'plant', 'nest', 'tent', 'gift']);
 
 export const PICTURE_WORDS = Object.freeze([
   ...new Set([...Object.values(FIRST_SOUND_WORDS).flat(), ...RHYME_SETS.flat(), ...BLEND_WORDS]),

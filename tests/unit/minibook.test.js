@@ -8,6 +8,10 @@ describe('minibook', () => {
     expect(minibookWords(withMastered(undefined, ['ls:s', 'ls:i', 'ls:p']))).toEqual(['sip']);
   });
 
+  it('leaves longer words out until they are ready to practise', () => {
+    expect(minibookWords(withMastered(undefined, ['ls:s', 'ls:t', 'ls:o', 'ls:p']))).not.toContain('stop');
+  });
+
   it('counts a digraph as one sound', () => {
     expect(minibookWords(withMastered(undefined, ['ls:f', 'ls:i', 'ls:sh']))).toEqual(['fish']);
   });

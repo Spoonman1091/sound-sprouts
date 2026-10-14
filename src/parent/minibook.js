@@ -1,11 +1,12 @@
 import { el } from '../ui/dom.js';
-import { BLEND_WORDS, graphemes } from '../curriculum/units.js';
+import { LETTER_ORDER } from '../curriculum/units.js';
+import { readyBlends } from '../curriculum/blends.js';
 import { unlockedLetters } from '../curriculum/unlock.js';
 import { isMastered } from '../state/progress.js';
 import { imgPath } from '../audio/clips.js';
 
 export const minibookWords = (progress) =>
-  BLEND_WORDS.filter((w) => graphemes(w).every((g) => isMastered(progress, `ls:${g}`)));
+  readyBlends(progress, LETTER_ORDER.filter((l) => isMastered(progress, `ls:${l}`)));
 
 const wordPage = (w) => el('section', { class: 'mb-page' }, [el('img', { src: imgPath(w), alt: '' }), el('p', { class: 'mb-word' }, [w])]);
 const letterPage = (l) => el('section', { class: 'mb-page' }, [el('p', { class: 'mb-letter' }, [l]), el('p', {}, ['Say the sound, then trace it!'])]);

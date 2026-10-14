@@ -44,6 +44,10 @@ describe('availableItems', () => {
     expect(availableItems(withMastered(undefined, ['ls:s', 'ls:a']))).not.toContain('blend:tap');
   });
 
+  it('holds longer words back while only the letters are mastered', () => {
+    expect(availableItems(withMastered(undefined, allLetterSounds))).not.toContain('blend:stop');
+  });
+
   it('needs the digraph itself mastered, not just its letters', () => {
     const singles = LETTER_ORDER.filter((l) => l.length === 1).map((l) => `ls:${l}`);
     expect(availableItems(withMastered(undefined, singles))).not.toContain('blend:fish');

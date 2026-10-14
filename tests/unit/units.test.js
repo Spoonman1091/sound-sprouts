@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS, soundsAlike, graphemes } from '../../src/curriculum/units.js';
+import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS, soundsAlike, graphemes, isLongWord } from '../../src/curriculum/units.js';
 
 describe('curriculum data', () => {
   it('teaches s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q in order', () => {
@@ -63,6 +63,14 @@ describe('curriculum data', () => {
     expect(FIRST_SOUND_WORDS.ng).toBeUndefined();
     expect(FIRST_SOUND_WORDS.ck).toBeUndefined();
     expect(BLEND_WORDS).toEqual(expect.arrayContaining(['fish', 'ship', 'chick', 'duck', 'sock', 'rock', 'bath', 'ring']));
+  });
+
+  it('has longer words with consonant blends', () => {
+    expect(BLEND_WORDS).toEqual(expect.arrayContaining(['frog', 'stop', 'hand', 'crab', 'drum', 'flag', 'milk', 'clock', 'plant', 'nest', 'tent', 'gift']));
+    expect(isLongWord('frog')).toBe(true);
+    expect(isLongWord('plant')).toBe(true);
+    expect(isLongWord('fish')).toBe(false);
+    expect(isLongWord('cat')).toBe(false);
   });
 
   it('splits words into sounds, keeping digraphs together', () => {
