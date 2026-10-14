@@ -32,6 +32,13 @@ export function interleave(a, b) {
 
 export const dedupeAdjacent = (ids) => ids.filter((id, i) => id !== ids[i - 1]);
 
+// Second showings of focus items come before review; if a repeat would land right after itself, slip a review item in between.
+function repeatsThenReview(firstPass, focus, review) {
+  const [head, ...tail] = review;
+  const collides = focus.length > 0 && focus[0] === firstPass[firstPass.length - 1];
+  return collides && head ? [head, ...focus, ...tail] : [...focus, ...review];
+}
+
 function pickWarmup(progress, available) {
   if (available.includes('name') && !isMastered(progress, 'name')) return 'name';
   return sortForReview(progress, available.filter(isRhyme))[0];
@@ -46,6 +53,7 @@ export function planSession(progress, rng = Math.random) {
   const rhymes = shuffle(rest.filter((id) => isRhyme(id) && !isMastered(progress, id)), rng)
     .slice(0, CONFIG.MAX_RHYMES_PER_SESSION);
   const review = sortForReview(progress, rest.filter((id) => isMastered(progress, id)));
-  const body = [...interleave(focus, rhymes), ...focus, ...review];
+  const firstPass = interleave(focus, rhymes);
+  const body = [...firstPass, ...repeatsThenReview(firstPass, focus, review)];
   return dedupeAdjacent([warmup, ...body]).slice(0, CONFIG.SESSION_LENGTH);
 }

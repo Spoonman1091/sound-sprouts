@@ -17,14 +17,16 @@ describe('buildTask', () => {
     expect(task.focusImg).toBe(`assets/img/${target}.svg`);
     expect(correctOf(task)).toHaveLength(1);
     expect(rhymes).toContain(correctOf(task)[0].id);
-    expect(RHYME_SETS[0]).not.toContain(task.choices.find((c) => !c.correct).id);
+    expect(task.choices).toHaveLength(3);
+    task.choices.filter((c) => !c.correct).forEach((c) => expect(RHYME_SETS[0]).not.toContain(c.id));
   });
 
   it('first-sound task offers a matching word and a non-matching distractor', () => {
     const task = buildTask('fs:s', { progress: fresh, rng: seededRng(3) });
     expect(task.prompt).toEqual([prompt('which_starts_with'), phoneme('s')]);
     expect(FIRST_SOUND_WORDS.s).toContain(correctOf(task)[0].id);
-    expect(task.choices.find((c) => !c.correct).id[0]).not.toBe('s');
+    expect(task.choices).toHaveLength(3);
+    task.choices.filter((c) => !c.correct).forEach((c) => expect(c.id[0]).not.toBe('s'));
   });
 
   it('letter-sound task only uses unlocked letters, at most LETTER_CHOICES', () => {
@@ -36,15 +38,27 @@ describe('buildTask', () => {
     expect(correctOf(task)[0].label).toBe('t');
   });
 
-  it('letter-sound task has two choices when only two letters are open', () => {
-    expect(buildTask('ls:s', { progress: fresh, rng: seededRng(1) }).choices).toHaveLength(2);
+  it.each([1, 2, 3, 4])('letter-sound task (seed %i) has three distinct choices even when only two letters are open', (seed) => {
+    const task = buildTask('ls:s', { progress: fresh, rng: seededRng(seed) });
+    expect(task.choices).toHaveLength(3);
+    expect(new Set(task.choices.map((c) => c.id)).size).toBe(3);
+    expect(task.choices.filter((c) => c.correct).map((c) => c.id)).toEqual(['s']);
+    task.choices.forEach((c) => expect(['s', 'a', 't', 'p', 'i', 'n']).toContain(c.id));
+  });
+
+  it.each([1, 2, 3, 4, 5, 6])('picture distractors (seed %i) are distinct', (seed) => {
+    ['rhyme:3', 'fs:p', 'blend:tin'].forEach((id) => {
+      const task = buildTask(id, { progress: fresh, rng: seededRng(seed) });
+      expect(new Set(task.choices.map((c) => c.id)).size).toBe(3);
+    });
   });
 
   it('blend task splits the word and pictures it among two choices', () => {
     const task = buildTask('blend:pin', { progress: fresh, rng: seededRng(2) });
     expect(task).toMatchObject({ activity: 'blend', word: 'pin', letters: ['p', 'i', 'n'] });
     expect(correctOf(task)[0].id).toBe('pin');
-    expect(BLEND_WORDS).toContain(task.choices.find((c) => !c.correct).id);
+    expect(task.choices).toHaveLength(3);
+    task.choices.forEach((c) => expect(BLEND_WORDS).toContain(c.id));
   });
 
   it('name task shuffles tile order over all name letters', () => {

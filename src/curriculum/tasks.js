@@ -8,6 +8,9 @@ import { nameLetters } from '../state/name.js';
 const pictureChoice = (w, correct) => ({ id: w, label: w, img: imgPath(w), audio: word(w), correct });
 const letterChoice = (l, correct) => ({ id: l, label: l, audio: phoneme(l), correct });
 
+const distinct = (pool, count, rng) => shuffle([...new Set(pool)], rng).slice(0, count);
+const pictureDistractors = (pool, rng) => distinct(pool, CONFIG.PICTURE_CHOICES - 1, rng).map((w) => pictureChoice(w, false));
+
 function assertKnown(condition, itemId) {
   if (!condition) throw new Error(`Unknown item id: ${itemId}`);
 }
@@ -19,7 +22,7 @@ function rhymeTask(index, rng) {
     activity: 'pickOne',
     focusImg: imgPath(target),
     prompt: [prompt('which_rhymes_with'), word(target)],
-    choices: shuffle([pictureChoice(pick(rhymes, rng), true), pictureChoice(pick(others, rng), false)], rng),
+    choices: shuffle([pictureChoice(pick(rhymes, rng), true), ...pictureDistractors(others, rng)], rng),
   };
 }
 
@@ -28,13 +31,16 @@ function firstSoundTask(letter, rng) {
   return {
     activity: 'pickOne',
     prompt: [prompt('which_starts_with'), phoneme(letter)],
-    choices: shuffle([pictureChoice(pick(FIRST_SOUND_WORDS[letter], rng), true), pictureChoice(pick(others, rng), false)], rng),
+    choices: shuffle([pictureChoice(pick(FIRST_SOUND_WORDS[letter], rng), true), ...pictureDistractors(others, rng)], rng),
   };
 }
 
 function letterSoundTask(letter, progress, rng) {
-  const pool = unlockedLetters(progress).filter((l) => l !== letter);
-  const distractors = shuffle(pool, rng).slice(0, CONFIG.LETTER_CHOICES - 1);
+  // Prefer letters already taught; top up with later letters so there are always enough choices.
+  const unlocked = unlockedLetters(progress);
+  const taught = shuffle(unlocked.filter((l) => l !== letter), rng);
+  const later = shuffle(LETTER_ORDER.filter((l) => !unlocked.includes(l)), rng);
+  const distractors = [...taught, ...later].slice(0, CONFIG.LETTER_CHOICES - 1);
   return {
     activity: 'pickOne',
     prompt: [prompt('find_the_letter'), phoneme(letter)],
@@ -43,8 +49,8 @@ function letterSoundTask(letter, progress, rng) {
 }
 
 function blendTask(w, rng) {
-  const other = pick(BLEND_WORDS.filter((x) => x !== w), rng);
-  return { activity: 'blend', word: w, letters: [...w], choices: shuffle([pictureChoice(w, true), pictureChoice(other, false)], rng) };
+  const others = BLEND_WORDS.filter((x) => x !== w);
+  return { activity: 'blend', word: w, letters: [...w], choices: shuffle([pictureChoice(w, true), ...pictureDistractors(others, rng)], rng) };
 }
 
 function nameTask(progress, rng) {

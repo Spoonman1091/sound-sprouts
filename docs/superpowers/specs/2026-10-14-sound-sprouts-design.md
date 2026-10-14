@@ -30,7 +30,8 @@ A free, ad-free, account-free early-reading web app built on systematic syntheti
 
 ## Learning rules
 
-- A session is up to 8 items: warm-up (name if not mastered, else a rhyme), up to 4 focus items (each shown twice), up to 2 rhymes, then review (struggling first, then least recently seen).
+- A session is up to 8 items: warm-up (name if not mastered, else a rhyme), up to 3 focus items (each shown twice), 1 more rhyme, then review (struggling first, then least recently seen).
+- Every multiple-choice question offers 3 choices, so random tapping rarely reaches mastery.
 - An item is **mastered** when its last 3 attempts were correct on the first try, across at least 2 different sessions. Mastery is sticky for unlocking.
 - **Struggling** means 2 or more first-try misses in the last 4 attempts.
 - Letters unlock in order. Two are always open; the next unlocks when the previous letter-sound item is mastered.

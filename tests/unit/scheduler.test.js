@@ -55,7 +55,8 @@ describe('planSession', () => {
     expect(plan.length).toBeGreaterThan(0);
     expect(plan.length).toBeLessThanOrEqual(CONFIG.SESSION_LENGTH);
     expect(plan[0]).toMatch(/^rhyme:/);
-    expect(plan).toEqual(expect.arrayContaining(['ls:s', 'fs:s', 'ls:a', 'fs:a']));
+    const letterItems = ['ls:s', 'fs:s', 'ls:a', 'fs:a'].filter((id) => plan.includes(id));
+    expect(letterItems).toHaveLength(CONFIG.FOCUS_ITEMS);
     plan.forEach((id, i) => expect(id).not.toBe(plan[i - 1]));
   });
 
@@ -65,6 +66,19 @@ describe('planSession', () => {
     expect(rhymes.length).toBeLessThanOrEqual(1 + CONFIG.MAX_RHYMES_PER_SESSION);
     expect(plan).toHaveLength(CONFIG.SESSION_LENGTH);
     expect(new Set(plan.filter((id) => !id.startsWith('rhyme:'))).size).toBeLessThan(plan.length - rhymes.length);
+  });
+
+  it.each([1, 2, 3, 4, 5])('fresh session (seed %i) shows every focus item twice', (seed) => {
+    const plan = planSession(createProgress(), seededRng(seed));
+    const focus = [...new Set(plan.filter((id) => /^(ls|fs):/.test(id)))];
+    expect(focus).toHaveLength(CONFIG.FOCUS_ITEMS);
+    focus.forEach((id) => expect(plan.filter((x) => x === id)).toHaveLength(2));
+  });
+
+  it('repeats a lone focus item instead of dropping it as a duplicate', () => {
+    const p = withMastered(undefined, ['ls:s', 'fs:s', 'fs:a', ...Array.from({ length: 9 }, (_, i) => `rhyme:${i}`)]);
+    const plan = planSession(p, seededRng(2));
+    expect(plan.filter((id) => id === 'ls:a')).toHaveLength(2);
   });
 
   it('review only brings back mastered items, never extra unmastered rhymes', () => {
