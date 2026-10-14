@@ -8,6 +8,7 @@ function fakeAudio({ playImpl } = {}) {
     onerror: null,
     play: vi.fn(playImpl ?? (() => Promise.resolve())),
     pause: vi.fn(),
+    removeAttribute: vi.fn(function removeAttribute(name) { if (name === 'src') this.src = ''; }),
   };
 }
 
@@ -52,6 +53,38 @@ describe('createPlayer', () => {
     await expect(result).resolves.toEqual({ ok: false });
   });
 
+  it('a timed-out clip is paused and unloaded so it cannot play late', async () => {
+    const audio = fakeAudio();
+    const result = createPlayer({ audio, timeoutMs: 1000 }).play('slow.mp3');
+    await vi.advanceTimersByTimeAsync(1000);
+    await result;
+    expect(audio.pause).toHaveBeenCalled();
+    expect(audio.src).toBe('');
+  });
+
+  it('while suspended, play/playSequence/say skip instantly without errors, and resume restores playback', async () => {
+    const audio = fakeAudio();
+    const onError = vi.fn();
+    const speech = { speak: vi.fn((u) => u.onend()), cancel: vi.fn() };
+    function Utterance(text) { this.text = text; }
+    const player = createPlayer({ audio, onError, speech, Utterance });
+    const playing = player.play('a.mp3');
+    player.suspend();
+    await expect(playing).resolves.toEqual({ ok: false, stopped: true });
+    audio.play.mockClear();
+    await expect(player.play('b.mp3')).resolves.toEqual({ ok: false, stopped: true });
+    await expect(player.playSequence(['c.mp3', 'd.mp3'])).resolves.toEqual({ ok: false, stopped: true });
+    await expect(player.say('Ava')).resolves.toEqual({ ok: false, stopped: true });
+    expect(audio.play).not.toHaveBeenCalled();
+    expect(speech.speak).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
+    player.resume();
+    const again = player.play('e.mp3');
+    expect(audio.play).toHaveBeenCalledOnce();
+    audio.onended();
+    await expect(again).resolves.toEqual({ ok: true });
+  });
+
   it('stop() resolves the current clip as stopped without reporting', async () => {
     const audio = fakeAudio();
     const onError = vi.fn();
@@ -84,7 +117,7 @@ describe('createPlayer', () => {
     expect(audio.src).toBe('b.mp3');
     player.stop();
     await expect(seq).resolves.toEqual({ ok: false, stopped: true });
-    expect(audio.src).toBe('b.mp3');
+    expect(audio.play).toHaveBeenCalledTimes(2);
   });
 
   it('playSequence reports not-ok if any clip failed but still plays the rest', async () => {

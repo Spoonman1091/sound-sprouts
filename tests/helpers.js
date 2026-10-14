@@ -17,6 +17,8 @@ export function fakePlayer(overrides = {}) {
     playSequence: vi.fn(async () => ({ ok: true })),
     say: vi.fn(async () => ({ ok: true })),
     stop: vi.fn(),
+    suspend: vi.fn(),
+    resume: vi.fn(),
     ...overrides,
   };
 }

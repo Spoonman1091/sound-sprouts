@@ -9,6 +9,8 @@ export function createPlayer({
   onError = () => {},
 } = {}) {
   let pending = null;
+  let suspended = false;
+  const skipped = () => Promise.resolve({ ok: false, stopped: true });
 
   function stop() {
     if (pending) {
@@ -20,6 +22,7 @@ export function createPlayer({
 
   function play(src) {
     stop();
+    if (suspended) return skipped();
     return new Promise((resolve) => {
       const token = Symbol(src);
       let timer = null;
@@ -29,6 +32,11 @@ export function createPlayer({
         clearTimeout(timer);
         audio.onended = null;
         audio.onerror = null;
+        if (!result.ok) {
+          // Unload so a slow clip can't start playing later over the child's taps.
+          audio.pause();
+          audio.removeAttribute?.('src');
+        }
         if (!result.ok && !result.stopped) onError(src);
         resolve(result);
       };
@@ -57,6 +65,7 @@ export function createPlayer({
 
   function say(text) {
     stop();
+    if (suspended) return skipped();
     if (!speech || typeof Utterance !== 'function') return Promise.resolve({ ok: false });
     return new Promise((resolve) => {
       const utterance = new Utterance(text);
@@ -68,5 +77,15 @@ export function createPlayer({
     });
   }
 
-  return { play, playSequence, say, stop };
+  // While the app is hidden every clip is skipped, so chained prompts can't keep playing in the background.
+  function suspend() {
+    suspended = true;
+    stop();
+  }
+
+  function resume() {
+    suspended = false;
+  }
+
+  return { play, playSequence, say, stop, suspend, resume };
 }
