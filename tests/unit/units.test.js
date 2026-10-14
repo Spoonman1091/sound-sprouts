@@ -4,7 +4,7 @@ import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, PICTURE_WORDS
 describe('curriculum data', () => {
   it('teaches s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q in order', () => {
     expect(LETTER_ORDER).toEqual(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q',
-      'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or', 'ur', 'ow', 'oi']);
+      'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or', 'ur', 'ow', 'oi', 'er', 'igh', 'ear']);
     expect(LETTER_ORDER.filter((l) => l.length === 1).sort().join('')).toBe('abcdefghijklmnopqrstuvwxyz');
     ['y', 'z'].forEach((l) => expect(FIRST_SOUND_WORDS[l]).toHaveLength(2));
     expect(FIRST_SOUND_WORDS.q).toEqual(['queen']);
@@ -86,9 +86,25 @@ describe('curriculum data', () => {
   });
 
   it('ends with the vowel teams ur ow oi, practised through blends', () => {
-    expect(LETTER_ORDER.slice(-3)).toEqual(['ur', 'ow', 'oi']);
+    expect(LETTER_ORDER.slice(37, 40)).toEqual(['ur', 'ow', 'oi']);
     ['ur', 'ow', 'oi'].forEach((v) => expect(FIRST_SOUND_WORDS[v]).toBeUndefined());
     expect(BLEND_WORDS).toEqual(expect.arrayContaining(['church', 'surf', 'cow', 'owl', 'crown', 'clown', 'coin', 'toilet', 'point']));
+  });
+
+  it('ends with er, igh and ear', () => {
+    expect(LETTER_ORDER.slice(-3)).toEqual(['er', 'igh', 'ear']);
+    expect(FIRST_SOUND_WORDS.ear).toEqual(['ear']);
+    expect(FIRST_SOUND_WORDS.er).toBeUndefined();
+    expect(FIRST_SOUND_WORDS.igh).toBeUndefined();
+    expect(BLEND_WORDS).toEqual(expect.arrayContaining(['burger', 'flower', 'light', 'night', 'beard']));
+  });
+
+  it('matches three-letter sounds before shorter ones', () => {
+    expect(graphemes('night')).toEqual(['n', 'igh', 't']);
+    expect(graphemes('beard')).toEqual(['b', 'ear', 'd']);
+    expect(graphemes('ear')).toEqual(['ear']);
+    expect(graphemes('flower')).toEqual(['f', 'l', 'ow', 'er']);
+    expect(graphemes('burger')).toEqual(['b', 'ur', 'g', 'er']);
   });
 
   it('keeps vowel teams together when splitting words', () => {

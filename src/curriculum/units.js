@@ -1,15 +1,15 @@
 // Letter order follows common synthetic-phonics programmes: s a t p, i n m d, g o c k, e u h r, f b, l j v w, x y z q,
-// then the digraphs sh ch th ng ck (two letters, one sound), then the vowel teams ee oo ai, oa ar or, ur ow oi.
+// then the digraphs sh ch th ng ck (two letters, one sound), then the vowel teams ee oo ai, oa ar or, ur ow oi, er igh ear.
 export const LETTER_ORDER = Object.freeze(['s', 'a', 't', 'p', 'i', 'n', 'm', 'd', 'g', 'o', 'c', 'k', 'e', 'u', 'h', 'r', 'f', 'b', 'l', 'j', 'v', 'w', 'x', 'y', 'z', 'q',
-  'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or', 'ur', 'ow', 'oi']);
+  'sh', 'ch', 'th', 'ng', 'ck', 'ee', 'oo', 'ai', 'oa', 'ar', 'or', 'ur', 'ow', 'oi', 'er', 'igh', 'ear']);
 
-const DIGRAPHS = Object.freeze(LETTER_ORDER.filter((l) => l.length === 2));
+// Longest first, so "ear" wins over "e" and "igh" over "i".
+const MULTI_LETTER = Object.freeze(LETTER_ORDER.filter((l) => l.length > 1).sort((a, b) => b.length - a.length));
 
-// Split a word into its sounds, keeping digraphs together: 'chick' -> ['ch', 'i', 'ck'].
+// Split a word into its sounds, keeping digraphs and trigraphs together: 'chick' -> ['ch', 'i', 'ck'].
 export function graphemes(w) {
   if (!w) return [];
-  const digraph = DIGRAPHS.find((d) => w.startsWith(d));
-  const head = digraph ?? w[0];
+  const head = MULTI_LETTER.find((d) => w.startsWith(d)) ?? w[0];
   return [head, ...graphemes(w.slice(head.length))];
 }
 
@@ -21,7 +21,7 @@ export const soundsAlike = (a, b) => a === b || SOUND_GROUPS.some((g) => g.inclu
 
 // No reliable picturable short-/i/ word exists in OpenMoji, so 'i' has no first-sound item.
 // No word a child knows starts with x's "ks" sound, so x is practised through blends (fox, box, six);
-// likewise ng and ck only come at the ends of words, and no picturable word starts with a vowel team.
+// likewise ng and ck only come at the ends of words, and no picturable word starts with a vowel team other than ear ("ear" itself).
 export const FIRST_SOUND_WORDS = Object.freeze({
   s: ['sun', 'sock'],
   a: ['apple', 'ant'],
@@ -50,6 +50,7 @@ export const FIRST_SOUND_WORDS = Object.freeze({
   sh: ['ship', 'sheep'],
   ch: ['chick', 'cheese'],
   th: ['thumb', 'three'],
+  ear: ['ear'],
 });
 
 // First word is the target; the rest rhyme with it.
@@ -81,7 +82,8 @@ export const BLEND_WORDS = Object.freeze(['pin', 'tap', 'pan', 'tin', 'sip', 'na
   // Vowel teams (oo as in moon, ow as in cow).
   'bee', 'tree', 'sheep', 'three', 'moon', 'spoon', 'tooth', 'boot', 'broom', 'rain', 'snail', 'train', 'chain',
   'goat', 'boat', 'coat', 'soap', 'car', 'star', 'yarn', 'jar', 'arm', 'cart', 'corn', 'fork',
-  'church', 'surf', 'cow', 'owl', 'crown', 'clown', 'coin', 'toilet', 'point']);
+  'church', 'surf', 'cow', 'owl', 'crown', 'clown', 'coin', 'toilet', 'point',
+  'burger', 'flower', 'light', 'night', 'beard']);
 
 export const PICTURE_WORDS = Object.freeze([
   ...new Set([...Object.values(FIRST_SOUND_WORDS).flat(), ...RHYME_SETS.flat(), ...BLEND_WORDS]),

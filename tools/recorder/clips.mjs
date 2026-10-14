@@ -41,6 +41,9 @@ const PHONEMES = [
   { id: 'ur', label: 'ur', example: 'fur', tip: 'The "ur" in "fur", held for about a second.' },
   { id: 'ow', label: 'ow', example: 'cow', tip: 'The "ow" in "cow" (like when you bump your knee), not the "oh" in "snow".' },
   { id: 'oi', label: 'oi', example: 'coin', tip: 'The "oi" in "coin", as in "oink" without the "nk".' },
+  { id: 'er', label: 'er', example: 'flower', tip: 'The soft "uh" at the end of "flower" — short and relaxed, no "r" growl.' },
+  { id: 'igh', label: 'igh', example: 'night', tip: 'The "eye" sound in "night", held for about a second.' },
+  { id: 'ear', label: 'ear', example: 'ear', tip: 'The word "ear" — the sound in "beard" and "hear".' },
 ];
 
 const LEAD_IN = 'A sound or word plays right after this, so let your voice trail off as if you are about to say it.';

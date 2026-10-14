@@ -102,7 +102,7 @@ describe('buildTask', () => {
   });
 
   it.each([1, 2, 3, 4, 5, 6, 7, 8])('first-sound distractors never begin with the same letter as the target (seed %i)', (seed) => {
-    ['s', 'sh', 'c', 'ch', 't', 'th'].forEach((target) => {
+    ['s', 'sh', 'c', 'ch', 't', 'th', 'e', 'ear'].forEach((target) => {
       const task = buildTask(`fs:${target}`, { progress: fresh, rng: seededRng(seed) });
       task.choices.filter((c) => !c.correct).forEach((c) => expect(c.id[0]).not.toBe(target[0]));
     });
