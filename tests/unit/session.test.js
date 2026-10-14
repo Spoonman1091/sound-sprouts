@@ -70,4 +70,30 @@ describe('runSession', () => {
     expect(order).toEqual(['activity', pause, 'activity', pause]);
     expect(CONFIG.TRANSITION_MS).toBeGreaterThanOrEqual(600);
   });
+
+  it('fades the finished activity out during the pause and asks the next one to settle first', async () => {
+    const stageClasses = [];
+    const seenDeps = [];
+    const run = vi.fn(async (stage, _task, deps) => {
+      seenDeps.push(deps);
+      stage.replaceChildren(Object.assign(document.createElement('div'), { className: 'activity' }));
+      return { firstTry: true };
+    });
+    const container = document.createElement('div');
+    const wait = vi.fn(async () => { stageClasses.push(container.querySelector('.activity').className); });
+    await runSession({
+      container,
+      progress: createProgress(),
+      planIds: ['ls:s'],
+      sessionId: 's',
+      deps: { player: fakePlayer(), activities: { pickOne: run, blend: run, nameSpell: run }, wait },
+      save: () => {},
+      now: () => 1,
+      rng: seededRng(1),
+    });
+    expect(stageClasses).toEqual(['activity leaving']);
+    expect(seenDeps[0].settleMs).toBe(CONFIG.SETTLE_MS);
+    expect(CONFIG.SETTLE_MS).toBeGreaterThanOrEqual(400);
+  });
 });
+

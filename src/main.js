@@ -1,6 +1,7 @@
 import { createPlayer } from './audio/player.js';
 import { stopWhenHidden } from './audio/visibility.js';
 import { prompt } from './audio/clips.js';
+import { CONFIG } from './config.js';
 import { loadProgress, saveProgress, createMemoryStorage, hasUnreadableBackup, dismissUnreadable } from './state/storage.js';
 import { planSession } from './curriculum/scheduler.js';
 import { renderHome } from './screens/home.js';
@@ -59,7 +60,7 @@ async function startSession() {
     deps: { player },
     save,
   });
-  renderDone(root, { before, after, player, onHome: showHome });
+  renderDone(root, { before, after, player, onHome: showHome, settleMs: CONFIG.SETTLE_MS });
 }
 
 function showGate() {

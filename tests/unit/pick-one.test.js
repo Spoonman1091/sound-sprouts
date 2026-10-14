@@ -20,6 +20,7 @@ describe('runPickOne', () => {
     runPickOne(root, task, { player });
     expect(root.querySelectorAll('.choice')).toHaveLength(2);
     expect(choice(root, 'sun').dataset.correct).toBe('true');
+    await flush();
     expect(player.playSequence).toHaveBeenCalledWith(['p1.mp3', 'p2.mp3']);
   });
 
@@ -105,4 +106,21 @@ describe('runPickOne', () => {
     runPickOne(root, letters, { player: fakePlayer() });
     expect(root.querySelector('.choice .letter').textContent).toBe('s');
   });
+
+  it('waits settleMs before the first prompt and ignores taps meanwhile', async () => {
+    const root = document.createElement('div');
+    const gate = deferred();
+    const wait = vi.fn(() => gate.promise);
+    const player = fakePlayer();
+    runPickOne(root, task, { player, wait, settleMs: 600 });
+    expect(wait).toHaveBeenCalledWith(600);
+    choice(root, 'sun').click();
+    await flush();
+    expect(player.playSequence).not.toHaveBeenCalled();
+    expect(player.play).not.toHaveBeenCalled();
+    gate.resolve();
+    await flush();
+    expect(player.playSequence).toHaveBeenCalledOnce();
+  });
 });
+

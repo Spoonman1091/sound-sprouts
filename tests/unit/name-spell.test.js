@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { runNameSpell } from '../../src/activities/name-spell.js';
 import { letterName, prompt } from '../../src/audio/clips.js';
-import { fakePlayer, flush } from '../helpers.js';
+import { fakePlayer, flush, deferred } from '../helpers.js';
 
 const anna = {
   name: 'Anna',
@@ -54,4 +54,17 @@ describe('runNameSpell', () => {
     root.querySelector('.tile[data-char="A"]').click();
     expect(root.querySelector('.slot').textContent).toBe('');
   });
+
+  it('settles before the intro prompt', async () => {
+    const root = document.createElement('div');
+    const gate = deferred();
+    const player = fakePlayer();
+    runNameSpell(root, anna, { player, wait: vi.fn(() => gate.promise), settleMs: 600 });
+    await flush();
+    expect(player.play).not.toHaveBeenCalled();
+    gate.resolve();
+    await flush();
+    expect(player.play).toHaveBeenCalledWith(prompt('spell_your_name'));
+  });
 });
+

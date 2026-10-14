@@ -1,5 +1,6 @@
 import { el } from '../ui/dom.js';
 import { letterName, prompt } from '../audio/clips.js';
+import { settle } from './settle.js';
 
 function renderNameSpell(task) {
   const slots = task.letters.map(() => el('span', { class: 'slot' }));
@@ -12,7 +13,8 @@ function renderNameSpell(task) {
   return { root, slots, tiles };
 }
 
-export function runNameSpell(container, task, { player }) {
+export function runNameSpell(container, task, deps) {
+  const { player } = deps;
   return new Promise((resolve) => {
     const { root, slots, tiles } = renderNameSpell(task);
     let ready = false;
@@ -49,6 +51,8 @@ export function runNameSpell(container, task, { player }) {
     }));
 
     container.replaceChildren(root);
-    player.play(prompt('spell_your_name')).then(() => setReady(true));
+    settle(deps)
+      .then(() => player.play(prompt('spell_your_name')))
+      .then(() => setReady(true));
   });
 }

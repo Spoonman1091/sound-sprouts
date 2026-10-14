@@ -1,6 +1,7 @@
 import { el } from '../ui/dom.js';
 import { phoneme, word, prompt, imgPath } from '../audio/clips.js';
 import { runPickOne } from './pick-one.js';
+import { settle } from './settle.js';
 
 function renderBlend(task) {
   const tiles = task.letters.map((letter, index) =>
@@ -13,7 +14,8 @@ function renderBlend(task) {
   return { root, tiles, hop, choiceStage };
 }
 
-export function runBlend(container, task, { player }) {
+export function runBlend(container, task, deps) {
+  const { player } = deps;
   return new Promise((resolve) => {
     const { root, tiles, hop, choiceStage } = renderBlend(task);
     let ready = false;
@@ -40,6 +42,8 @@ export function runBlend(container, task, { player }) {
     });
 
     container.replaceChildren(root);
-    player.play(prompt('tap_each_letter')).then(() => setReady(true));
+    settle(deps)
+      .then(() => player.play(prompt('tap_each_letter')))
+      .then(() => setReady(true));
   });
 }

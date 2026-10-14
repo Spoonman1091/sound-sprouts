@@ -1,5 +1,6 @@
 import { el } from '../ui/dom.js';
 import { prompt } from '../audio/clips.js';
+import { settle } from './settle.js';
 
 function choiceFace(choice) {
   return choice.img
@@ -20,7 +21,8 @@ function renderPickOne(task) {
   return { root, replay, buttons };
 }
 
-export function runPickOne(container, task, { player }) {
+export function runPickOne(container, task, deps) {
+  const { player } = deps;
   return new Promise((resolve) => {
     const { root, replay, buttons } = renderPickOne(task);
     let ready = false;
@@ -59,6 +61,6 @@ export function runPickOne(container, task, { player }) {
     replay.addEventListener('click', () => { if (ready) ask(); });
 
     container.replaceChildren(root);
-    ask();
+    settle(deps).then(ask);
   });
 }

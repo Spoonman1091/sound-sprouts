@@ -41,7 +41,10 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--shadow); }
 .dot.filled { background: var(--leaf); }
 .stage { flex: 1; display: flex; }
-.activity { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; position: relative; }
+.activity { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; position: relative; animation: enter .45s ease-out both; }
+.activity.leaving { animation: leave .5s ease-in forwards; }
+@keyframes leave { to { opacity: 0; transform: translateY(-16px) scale(.98); } }
+@keyframes enter { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: none; } }
 .activity[data-ready="false"] > .choices, .activity[data-ready="false"] > .tiles { opacity: .6; transition: opacity .2s; }
 .replay { position: absolute; top: 0; left: 0; width: var(--tap); height: var(--tap); border-radius: 50%; background: var(--sun); font-size: 2.5rem; }
 .focus { width: min(30vw, 200px); }
@@ -68,7 +71,7 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .slot[data-hint]:empty::after { content: attr(data-hint); opacity: .25; }
 
 /* Done */
-.done { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.done { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; animation: enter .6s ease-out both; }
 .home-button { width: calc(var(--tap) * 1.4); height: calc(var(--tap) * 1.4); border-radius: 50%; background: var(--card); box-shadow: 0 8px 0 var(--shadow); }
 .home-button img { width: 70%; }
 

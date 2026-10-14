@@ -23,11 +23,12 @@ export async function runSession({ container, progress, planIds, sessionId, deps
   let current = progress;
   for (const [index, itemId] of planIds.entries()) {
     const task = buildTask(itemId, { progress: current, rng });
-    const { firstTry } = await activities[task.activity](shell.stage, task, deps);
+    const { firstTry } = await activities[task.activity](shell.stage, task, { ...deps, settleMs: CONFIG.SETTLE_MS });
     current = recordAttempt(current, { itemId, firstTry, sessionId, at: now() });
     save(current);
     shell.markDone(index);
-    // A breather after the cheer, so one activity doesn't tumble straight into the next (or the done screen).
+    // A breather after the cheer: the finished activity fades out before the next one (or the done screen) fades in.
+    shell.stage.firstElementChild?.classList.add('leaving');
     await wait(CONFIG.TRANSITION_MS);
   }
   const finished = recordSession(current, { sessionId, at: now(), itemCount: planIds.length });

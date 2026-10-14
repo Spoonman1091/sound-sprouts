@@ -5,7 +5,7 @@ import { renderHome } from '../../src/screens/home.js';
 import { renderDone, newlyBloomed } from '../../src/screens/done.js';
 import { prompt } from '../../src/audio/clips.js';
 import { CONFIG } from '../../src/config.js';
-import { fakePlayer, withMastered } from '../helpers.js';
+import { fakePlayer, withMastered, deferred, flush } from '../helpers.js';
 
 describe('renderGarden', () => {
   it('draws one plot per letter with its status', () => {
@@ -52,6 +52,19 @@ describe('done screen', () => {
     root.querySelector('.home-button').click();
     expect(player.stop).toHaveBeenCalled();
     expect(onHome).toHaveBeenCalledOnce();
+  });
+
+  it('settles before celebrating', async () => {
+    const gate = deferred();
+    const player = fakePlayer();
+    const wait = vi.fn(() => gate.promise);
+    const done = renderDone(document.createElement('div'), { before: createProgress(), after: createProgress(), player, onHome: vi.fn(), wait, settleMs: 600 });
+    await flush();
+    expect(wait).toHaveBeenCalledWith(600);
+    expect(player.playSequence).not.toHaveBeenCalled();
+    gate.resolve();
+    await done;
+    expect(player.playSequence).toHaveBeenCalledOnce();
   });
 
   it('just says all done when nothing bloomed', async () => {

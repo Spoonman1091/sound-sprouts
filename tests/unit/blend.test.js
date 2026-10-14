@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { runBlend } from '../../src/activities/blend.js';
 import { phoneme, word } from '../../src/audio/clips.js';
-import { fakePlayer, flush } from '../helpers.js';
+import { fakePlayer, flush, deferred } from '../helpers.js';
 
 const task = {
   word: 'pin',
@@ -62,4 +62,22 @@ describe('runBlend', () => {
     await flush();
     expect(player.playSequence.mock.calls.filter(([srcs]) => srcs.includes(word('pin')))).toHaveLength(1);
   });
+
+  it('settles before the intro, but the picture question after the hop does not wait again', async () => {
+    const root = document.createElement('div');
+    const gate = deferred();
+    const wait = vi.fn(() => gate.promise);
+    const player = fakePlayer();
+    runBlend(root, task, { player, wait, settleMs: 600 });
+    await flush();
+    expect(player.play).not.toHaveBeenCalled();
+    gate.resolve();
+    await flush();
+    for (const i of [0, 1, 2]) { tile(root, i).click(); await flush(); }
+    root.querySelector('.hop').click();
+    await flush();
+    expect(wait).toHaveBeenCalledOnce();
+    expect(root.querySelector('.pick-one').dataset.ready).toBe('true');
+  });
 });
+
