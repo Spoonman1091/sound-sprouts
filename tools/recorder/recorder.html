@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound Sprouts Recorder</title>
+<style>
+  :root { --bg:#fff7e0; --ink:#3b3024; --leaf:#5fae63; --leaf-dark:#3f8a44; --rec:#c0413c; --card:#fff; --line:#e6d9b8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family: ui-rounded, system-ui, sans-serif; }
+  main { width:min(100% - 32px, 760px); margin:24px auto 48px; }
+  h1 { margin:0 0 4px; color:var(--leaf-dark); }
+  .intro { line-height:1.5; }
+  .intro li { margin:4px 0; }
+  .clip { display:grid; grid-template-columns: 88px 1fr; gap:16px; align-items:center; background:var(--card); border-radius:20px; padding:16px; margin:16px 0; box-shadow:0 4px 0 var(--line); }
+  .letter { font-size:4rem; font-weight:700; text-align:center; line-height:1; }
+  .example { font-size:.9rem; text-align:center; opacity:.7; }
+  .tip { margin:0 0 12px; }
+  .buttons { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  button { font:inherit; font-weight:700; min-height:44px; padding:8px 16px; border:none; border-radius:12px; cursor:pointer; background:var(--line); color:var(--ink); }
+  button:disabled { opacity:.4; cursor:default; }
+  button.record { background:var(--rec); color:#fff; }
+  button.record.on { animation:pulse 1s infinite; }
+  button.save { background:var(--leaf); color:#fff; }
+  @keyframes pulse { 50% { opacity:.6; } }
+  .status { font-size:.9rem; margin-left:auto; }
+  .status.done { color:var(--leaf-dark); font-weight:700; }
+  .status.error { color:var(--rec); }
+  .meter { height:6px; border-radius:3px; background:var(--line); margin-top:10px; overflow:hidden; }
+  .meter span { display:block; height:100%; width:0; background:var(--leaf); transition:width .05s; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sound Sprouts Recorder</h1>
+  <div class="intro">
+    <p>Record each sound the way you'd say it to her. Tips:</p>
+    <ul>
+      <li>Use a quiet room and keep the mic about a hand's width from your mouth.</li>
+      <li>Say <strong>only the sound</strong>. Hold s and n for about a second; keep t and p short and whispered.</li>
+      <li>Press <strong>Record</strong>, say the sound, then press <strong>Stop</strong> (it stops by itself after 4 seconds).</li>
+      <li>Listen to the take. If you like it, press <strong>Save</strong>; the saved version is trimmed, levelled, and played back.</li>
+    </ul>
+  </div>
+  <p id="global-error" class="status error" role="alert"></p>
+  <div id="clips"></div>
+</main>
+<script type="module">
+const MAX_TAKE_MS = 4000;
+const clipsEl = document.getElementById('clips');
+const globalError = document.getElementById('global-error');
+let streamPromise = null;
+
+function getStream() {
+  streamPromise ??= navigator.mediaDevices.getUserMedia({
+    audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: false },
+  });
+  return streamPromise;
+}
+
+function el(tag, props = {}, children = []) {
+  const node = Object.assign(document.createElement(tag), props);
+  node.append(...children);
+  return node;
+}
+
+function playUrl(url) {
+  const audio = new Audio(url);
+  return audio.play().catch(() => {});
+}
+
+function levelMeter(stream, bar) {
+  const ctx = new AudioContext();
+  const analyser = ctx.createAnalyser();
+  ctx.createMediaStreamSource(stream).connect(analyser);
+  const data = new Uint8Array(analyser.fftSize);
+  let running = true;
+  const tick = () => {
+    if (!running) return;
+    analyser.getByteTimeDomainData(data);
+    const peak = data.reduce((max, v) => Math.max(max, Math.abs(v - 128)), 0) / 128;
+    bar.style.width = `${Math.min(100, peak * 140)}%`;
+    requestAnimationFrame(tick);
+  };
+  tick();
+  return () => { running = false; bar.style.width = '0'; ctx.close(); };
+}
+
+function renderClip(clip) {
+  const status = el('span', { className: `status${clip.recorded ? ' done' : ''}`, textContent: clip.recorded ? 'Saved ✓' : 'Not recorded yet' });
+  const record = el('button', { className: 'record', textContent: '● Record' });
+  const playTake = el('button', { textContent: '▶ Take', disabled: true });
+  const save = el('button', { className: 'save', textContent: 'Save', disabled: true });
+  const playSaved = el('button', { textContent: '▶ Saved', disabled: !clip.recorded });
+  const bar = el('span');
+  let take = null;
+  let recorder = null;
+
+  const setStatus = (text, cls = '') => { status.textContent = text; status.className = `status ${cls}`; };
+
+  async function start() {
+    try {
+      const stream = await getStream();
+      const chunks = [];
+      const stopMeter = levelMeter(stream, bar);
+      recorder = new MediaRecorder(stream);
+      recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+      recorder.onstop = () => {
+        stopMeter();
+        take = new Blob(chunks, { type: recorder.mimeType });
+        recorder = null;
+        record.textContent = '● Record again';
+        record.classList.remove('on');
+        playTake.disabled = false;
+        save.disabled = false;
+        setStatus('Listen, then save or record again');
+        playUrl(URL.createObjectURL(take));
+      };
+      recorder.start();
+      record.textContent = '■ Stop';
+      record.classList.add('on');
+      setStatus('Recording…');
+      setTimeout(() => { if (recorder?.state === 'recording') recorder.stop(); }, MAX_TAKE_MS);
+    } catch (error) {
+      setStatus('Microphone blocked — allow it in the browser and reload.', 'error');
+    }
+  }
+
+  record.addEventListener('click', () => (recorder ? recorder.stop() : start()));
+  playTake.addEventListener('click', () => take && playUrl(URL.createObjectURL(take)));
+  playSaved.addEventListener('click', () => playUrl(`/audio/${clip.id}?t=${Date.now()}`));
+  save.addEventListener('click', async () => {
+    save.disabled = true;
+    setStatus('Saving…');
+    try {
+      const res = await fetch(`/save/${clip.id}`, { method: 'POST', body: take });
+      const body = await res.json();
+      if (!body.ok) throw new Error(body.error);
+      setStatus('Saved ✓', 'done');
+      playSaved.disabled = false;
+      playUrl(`/audio/${clip.id}?t=${Date.now()}`);
+    } catch (error) {
+      save.disabled = false;
+      setStatus(error.message || 'Saving failed. Try again.', 'error');
+    }
+  });
+
+  return el('section', { className: 'clip' }, [
+    el('div', {}, [el('div', { className: 'letter', textContent: clip.label }), el('div', { className: 'example', textContent: `as in ${clip.example}` })]),
+    el('div', {}, [
+      el('p', { className: 'tip', textContent: clip.tip }),
+      el('div', { className: 'buttons' }, [record, playTake, save, playSaved, status]),
+      el('div', { className: 'meter' }, [bar]),
+    ]),
+  ]);
+}
+
+fetch('/clips')
+  .then((res) => res.json())
+  .then((clips) => clipsEl.replaceChildren(...clips.map(renderClip)))
+  .catch(() => { globalError.textContent = 'Could not reach the recorder server. Is "npm run record" still running?'; });
+</script>
+</body>
+</html>
