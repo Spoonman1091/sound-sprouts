@@ -3,6 +3,7 @@ import { createProgress } from '../../src/state/progress.js';
 import { renderGarden } from '../../src/screens/garden.js';
 import { renderHome } from '../../src/screens/home.js';
 import { renderDone, newlyBloomed } from '../../src/screens/done.js';
+import { runMeet } from '../../src/screens/meet.js';
 import { prompt } from '../../src/audio/clips.js';
 import { CONFIG } from '../../src/config.js';
 import { LETTER_ORDER } from '../../src/curriculum/units.js';
@@ -17,6 +18,37 @@ describe('renderGarden', () => {
     expect(plots[0].classList.contains('bloom')).toBe(true);
     expect(plots[2].querySelector('.seed')).not.toBeNull();
   });
+
+  it('lets her tap an open plot to meet its letter again, but not a seed', () => {
+    const onMeet = vi.fn();
+    const garden = renderGarden(withMastered(undefined, ['ls:s']), { onMeet });
+    const plots = [...garden.querySelectorAll('.plot')];
+    expect(plots[0].tagName).toBe('BUTTON');
+    expect(plots[0].getAttribute('aria-label')).toBe('Meet s');
+    expect(plots[1].tagName).toBe('BUTTON');
+    expect(plots[2].tagName).toBe('DIV');
+    plots[1].click();
+    expect(onMeet).toHaveBeenCalledWith('a');
+  });
+
+  it('is not tappable when no one is listening, e.g. on the done screen', () => {
+    const garden = renderGarden(createProgress());
+    expect(garden.querySelector('button')).toBeNull();
+  });
+});
+
+describe('runMeet', () => {
+  it('runs the introduction for one sound and returns progress that remembers it', async () => {
+    const container = document.createElement('div');
+    const intro = vi.fn(async (stage, task) => {
+      expect(stage.classList.contains('stage')).toBe(true);
+      expect(task).toMatchObject({ activity: 'intro', sound: 'sh' });
+      return { introduced: true };
+    });
+    const after = await runMeet({ container, sound: 'sh', progress: createProgress(), deps: { player: fakePlayer(), activities: { intro } } });
+    expect(intro).toHaveBeenCalledOnce();
+    expect(after.introduced).toEqual(['sh']);
+  });
 });
 
 describe('renderHome', () => {
@@ -27,7 +59,10 @@ describe('renderHome', () => {
     const root = document.createElement('div');
     const onPlay = vi.fn();
     const onParent = vi.fn();
-    renderHome(root, { progress: createProgress(), onPlay, onParent });
+    const onMeet = vi.fn();
+    renderHome(root, { progress: createProgress(), onPlay, onParent, onMeet });
+    root.querySelector('.plot[data-letter="a"]').click();
+    expect(onMeet).toHaveBeenCalledWith('a');
     const play = root.querySelector('.play');
     play.click();
     play.click();

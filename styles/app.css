@@ -132,3 +132,25 @@ img { pointer-events: none; -webkit-user-drag: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* "Meet the letter": one step shows at a time. */
+.intro > div { display: none; flex-direction: column; align-items: center; gap: 24px; }
+.intro[data-step="meet"] .intro-meet, .intro[data-step="trace"] .intro-trace, .intro[data-step="say"] .intro-say { display: flex; }
+.intro-letter { margin: 0; font-size: clamp(7rem, 28vh, 15rem); font-weight: 700; line-height: 1; }
+.intro-examples { display: flex; gap: clamp(16px, 4vw, 48px); }
+.intro .example { width: clamp(96px, 16vw, 170px); opacity: .3; transition: opacity .3s, transform .3s; }
+.intro .example.lit { opacity: 1; transform: scale(1.08); }
+.intro-trace { position: relative; touch-action: none; }
+svg.trace { height: min(68vh, 560px); width: auto; max-width: 86vw; touch-action: none; background: var(--card); border-radius: 32px; box-shadow: 0 8px 0 var(--shadow); }
+svg.trace .guide { fill: none; stroke: #d8c9a3; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0.5 9; }
+svg.trace .ink circle { fill: var(--leaf); }
+svg.trace .start { fill: var(--sun); }
+svg.trace .arrow { fill: var(--leaf-dark); opacity: .8; }
+svg.trace { min-width: min(50vw, 420px); }
+svg.trace .start.first { fill: var(--leaf-dark); animation: pulse 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.intro.traced svg.trace { animation: pop .4s; }
+.intro-next { position: absolute; right: -24px; bottom: -24px; width: var(--tap); height: var(--tap); border-radius: 50%; background: var(--leaf); color: #fff; font-size: 2.5rem; box-shadow: 0 6px 0 var(--leaf-dark); }
+.intro-say .intro-letter { animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.08); } }
+button.plot { border: none; padding: 0; font: inherit; cursor: pointer; }
+button.plot:active { transform: scale(.95); }

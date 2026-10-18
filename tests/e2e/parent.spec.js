@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockAudio, holdGear, openParentDashboard, playWholeSession } from './helpers.js';
+import { blockAudio, holdGear, openParentDashboard, playWholeSession, answerNext } from './helpers.js';
 
 test.beforeEach(async ({ page }) => { await blockAudio(page); });
 
@@ -41,6 +41,8 @@ test('a long name fits on screen without sideways scrolling', async ({ page }) =
   await page.getByRole('button', { name: 'Save name' }).click();
   await page.getByRole('button', { name: 'Back to the garden' }).click();
   await page.getByRole('button', { name: 'Play' }).click();
+  await answerNext(page);
+  await answerNext(page);
   await page.locator('.name-spell').waitFor();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);

@@ -32,6 +32,21 @@ describe('storage', () => {
     expect(loadProgress(storage)).toEqual({ progress: createProgress(), status: 'reset' });
   });
 
+  it('cleans up a damaged list of met sounds instead of starting fresh', () => {
+    const storage = createMemoryStorage();
+    storage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({ ...createProgress(), childName: 'Ava', introduced: ['s', 1, null] }));
+    expect(loadProgress(storage)).toEqual({ progress: { ...createProgress(), childName: 'Ava', introduced: ['s'] }, status: 'loaded' });
+    storage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({ ...createProgress(), introduced: 'oops' }));
+    expect(loadProgress(storage).status).toBe('loaded');
+  });
+
+  it('loads progress saved before introductions existed', () => {
+    const storage = createMemoryStorage();
+    const { introduced, ...older } = createProgress();
+    storage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(older));
+    expect(loadProgress(storage)).toEqual({ progress: createProgress(), status: 'loaded' });
+  });
+
   it('upgrades version-1 progress instead of starting fresh', () => {
     const storage = createMemoryStorage();
     const attempts = [['s1', 1], ['s1', 2], ['s2', 3]].map(([sessionId, at]) => ({ firstTry: true, sessionId, at }));

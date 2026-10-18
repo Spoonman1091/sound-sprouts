@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CONFIG } from '../../src/config.js';
 import {
-  createProgress, recordAttempt, recordSession, isMastered, isStruggling, lastSeen, setChildName, markMastered,
+  createProgress, recordAttempt, recordSession, isMastered, isStruggling, lastSeen, setChildName, markMastered, markIntroduced, hasMet,
 } from '../../src/state/progress.js';
 
 const attempt = (p, itemId, firstTry, sessionId, at) => recordAttempt(p, { itemId, firstTry, sessionId, at });
@@ -114,5 +114,24 @@ describe('markMastered', () => {
     expect(markMastered(createProgress(), 'ls:a', 7).items['ls:a']).toEqual({ attempts: [], masteredAt: 7, parentMarked: true });
     const mastered = markMastered(createProgress(), 'ls:a', 7);
     expect(markMastered(mastered, 'ls:a', 99).items['ls:a'].masteredAt).toBe(7);
+  });
+});
+
+describe('introductions', () => {
+  it('starts with nothing met, and remembers each sound once', () => {
+    const fresh = createProgress();
+    expect(fresh.introduced).toEqual([]);
+    const met = markIntroduced(markIntroduced(fresh, 's'), 's');
+    expect(met.introduced).toEqual(['s']);
+    expect(hasMet(met, 's')).toBe(true);
+    expect(hasMet(fresh, 's')).toBe(false);
+    expect(fresh.introduced).toEqual([]);
+  });
+
+  it('treats progress saved before introductions existed as nothing met', () => {
+    const { introduced, ...older } = createProgress();
+    expect(introduced).toEqual([]);
+    expect(hasMet(older, 's')).toBe(false);
+    expect(markIntroduced(older, 'a').introduced).toEqual(['a']);
   });
 });

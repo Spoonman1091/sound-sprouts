@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { blockAudio, playWholeSession } from './helpers.js';
+import { blockAudio, playWholeSession, answerNext, traceIntro } from './helpers.js';
 
 test.beforeEach(async ({ page }) => {
   await blockAudio(page);
@@ -13,7 +13,7 @@ test('home shows the garden with two sprouts', async ({ page }) => {
 
 test('a full session completes and is saved', async ({ page }) => {
   const total = await playWholeSession(page);
-  expect(total).toBe(8);
+  expect(total).toBe(2 + 8);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sound-sprouts:v1')));
   expect(saved.sessions).toHaveLength(1);
   await page.getByRole('button', { name: 'Back to the garden' }).click();
@@ -22,6 +22,8 @@ test('a full session completes and is saved', async ({ page }) => {
 
 test('choices are big enough for small fingers', async ({ page }) => {
   await page.getByRole('button', { name: 'Play' }).click();
+  await answerNext(page);
+  await answerNext(page);
   const choice = page.locator('.choice').first();
   await choice.waitFor();
   const box = await choice.boundingBox();
@@ -31,12 +33,13 @@ test('choices are big enough for small fingers', async ({ page }) => {
 
 test('progress from a half-finished session survives a reload', async ({ page }) => {
   await page.getByRole('button', { name: 'Play' }).click();
-  const ready = page.locator('.pick-one[data-ready="true"]');
-  await ready.waitFor();
-  await ready.locator('[data-correct="true"]').click();
-  await expect(page.locator('.dot.filled')).toHaveCount(1);
+  for (const step of [1, 2, 3]) {
+    await answerNext(page);
+    await expect(page.locator('.dot.filled')).toHaveCount(step);
+  }
   await page.reload();
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sound-sprouts:v1')));
+  expect(saved.introduced).toEqual(['s', 'a']);
   expect(Object.keys(saved.items)).toHaveLength(1);
 });
 
@@ -52,4 +55,24 @@ test('the whole garden and the Play button fit on screen without scrolling', asy
   const fits = await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight);
   expect(fits).toBe(true);
   await expect(page.getByRole('button', { name: 'Play' })).toBeInViewport({ ratio: 1 });
+});
+
+test('a first lesson starts by meeting s: big letter, pictures, then tracing', async ({ page }) => {
+  await page.getByRole('button', { name: 'Play' }).click();
+  const intro = page.locator('.intro');
+  await expect(intro).toHaveAttribute('data-step', 'meet');
+  await expect(intro.locator('.intro-meet .intro-letter')).toHaveText('s');
+  await expect(intro.locator('.example')).toHaveCount(2);
+  await traceIntro(page);
+  await expect(intro).toHaveAttribute('data-step', 'say');
+});
+
+test('tapping an open garden plot meets that letter again, then goes home', async ({ page }) => {
+  await page.getByRole('button', { name: 'Meet a' }).click();
+  await expect(page.locator('.intro .intro-meet .intro-letter')).toHaveText('a');
+  await traceIntro(page);
+  await expect(page.getByRole('button', { name: 'Play' })).toBeVisible({ timeout: 15_000 });
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sound-sprouts:v1')));
+  expect(saved.introduced).toEqual(['a']);
+  await expect(page.locator('.plot[data-letter="t"]')).not.toHaveAttribute('role', 'button');
 });

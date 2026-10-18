@@ -15,8 +15,19 @@ function migrateItemFromV1(item) {
   return item.attempts.length === 0 ? { ...item, parentMarked: true } : item;
 }
 
+// Saves from before introductions existed have no list of met sounds: count sounds she has already
+// practised as met, so she is not re-introduced to them. A damaged list is cleaned, not rejected.
+const practisedSounds = (items) => Object.entries(items)
+  .filter(([id, item]) => id.startsWith('ls:') && item.attempts.length > 0)
+  .map(([id]) => id.slice('ls:'.length));
+
+const withIntroduced = (data) => ({
+  ...data,
+  introduced: Array.isArray(data.introduced) ? data.introduced.filter((s) => typeof s === 'string') : practisedSounds(data.items),
+});
+
 export function migrateProgress(data) {
-  if (data.version === CONFIG.SCHEMA_VERSION) return data;
+  if (data.version === CONFIG.SCHEMA_VERSION) return withIntroduced(data);
   const items = Object.fromEntries(Object.entries(data.items).map(([id, item]) => [id, migrateItemFromV1(item)]));
-  return { ...data, version: CONFIG.SCHEMA_VERSION, items };
+  return withIntroduced({ ...data, version: CONFIG.SCHEMA_VERSION, items });
 }

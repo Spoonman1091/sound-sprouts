@@ -1,7 +1,7 @@
 import { el } from '../ui/dom.js';
 import { buildTask } from '../curriculum/tasks.js';
 import { ACTIVITIES } from '../activities/index.js';
-import { recordAttempt, recordSession } from '../state/progress.js';
+import { recordAttempt, recordSession, markIntroduced } from '../state/progress.js';
 import { CONFIG } from '../config.js';
 
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -23,8 +23,11 @@ export async function runSession({ container, progress, planIds, sessionId, deps
   let current = progress;
   for (const [index, itemId] of planIds.entries()) {
     const task = buildTask(itemId, { progress: current, rng });
-    const { firstTry } = await activities[task.activity](shell.stage, task, { ...deps, settleMs: CONFIG.SETTLE_MS, leadInGapMs: CONFIG.LEAD_IN_GAP_MS, questionGapMs: CONFIG.QUESTION_GAP_MS, narrateGapMs: CONFIG.NARRATION_GAP_MS });
-    current = recordAttempt(current, { itemId, firstTry, sessionId, at: now() });
+    const result = await activities[task.activity](shell.stage, task, { ...deps, settleMs: CONFIG.SETTLE_MS, leadInGapMs: CONFIG.LEAD_IN_GAP_MS, questionGapMs: CONFIG.QUESTION_GAP_MS, narrateGapMs: CONFIG.NARRATION_GAP_MS });
+    // Introductions are not scored: they only record that she has met the sound.
+    current = task.activity === 'intro'
+      ? markIntroduced(current, task.sound)
+      : recordAttempt(current, { itemId, firstTry: result.firstTry, sessionId, at: now() });
     save(current);
     shell.markDone(index);
     // A breather after the cheer: the finished activity fades out before the next one (or the done screen) fades in.

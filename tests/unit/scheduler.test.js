@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { CONFIG } from '../../src/config.js';
 import { createProgress, setChildName, recordAttempt } from '../../src/state/progress.js';
-import { availableItems, sortForReview, interleave, dedupeAdjacent, planSession } from '../../src/curriculum/scheduler.js';
+import { availableItems, sortForReview, interleave, dedupeAdjacent, planSession, introsDue, planLesson } from '../../src/curriculum/scheduler.js';
+import { markIntroduced, markMastered } from '../../src/state/progress.js';
 import { LETTER_ORDER, FIRST_SOUND_WORDS } from '../../src/curriculum/units.js';
 import { seededRng, withMastered } from '../helpers.js';
 
@@ -122,5 +123,26 @@ describe('planSession', () => {
     const everything = availableItems(withMastered(undefined, allLetterSounds));
     const plan = planSession(withMastered(undefined, everything), seededRng(4));
     expect(plan).toHaveLength(CONFIG.SESSION_LENGTH);
+  });
+});
+
+describe('introductions', () => {
+  it('introduces each open sound she has not met yet', () => {
+    expect(introsDue(createProgress())).toEqual(['s', 'a']);
+    expect(introsDue(markIntroduced(createProgress(), 's'))).toEqual(['a']);
+  });
+
+  it('skips sounds that are already mastered, e.g. marked by a parent', () => {
+    const p = ['s', 'a'].reduce((acc, l) => markMastered(acc, `ls:${l}`, 1), createProgress());
+    expect(introsDue(p)).toEqual(['t']);
+  });
+
+  it('starts a lesson with its introductions, then the usual practice', () => {
+    const fresh = createProgress();
+    const lesson = planLesson(fresh, seededRng(3));
+    expect(lesson.slice(0, 2)).toEqual(['intro:s', 'intro:a']);
+    expect(lesson.slice(2)).toEqual(planSession(fresh, seededRng(3)));
+    const met = ['s', 'a'].reduce(markIntroduced, fresh);
+    expect(planLesson(met, seededRng(3)).some((id) => id.startsWith('intro:'))).toBe(false);
   });
 });

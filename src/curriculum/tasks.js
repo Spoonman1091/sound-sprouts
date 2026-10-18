@@ -3,6 +3,7 @@ import { LETTER_ORDER, FIRST_SOUND_WORDS, RHYME_SETS, BLEND_WORDS, CHEERS, SIGHT
 import { shuffle, pick } from './random.js';
 import { unlockedLetters } from './unlock.js';
 import { phoneme, word, prompt, imgPath, letterName } from '../audio/clips.js';
+import { strokesFor } from '../intro/strokes.js';
 import { nameLetters } from '../state/name.js';
 
 const pictureChoice = (w, correct) => ({ id: w, label: w, img: imgPath(w), audio: word(w), correct });
@@ -76,6 +77,23 @@ function sightWordTask(id, rng) {
   };
 }
 
+// Example pictures for an introduction: its first-sound words, or else words that contain the sound.
+function introExamples(sound) {
+  const words = FIRST_SOUND_WORDS[sound] ?? BLEND_WORDS.filter((w) => graphemes(w).includes(sound));
+  return words.slice(0, CONFIG.INTRO_EXAMPLES).map((w) => ({ id: w, img: imgPath(w), audio: word(w) }));
+}
+
+function introTask(sound) {
+  return {
+    activity: 'intro',
+    sound,
+    names: [...sound].map(letterName),
+    soundClip: phoneme(sound),
+    examples: introExamples(sound),
+    strokes: strokesFor(sound),
+  };
+}
+
 function nameTask(progress, rng) {
   const letters = nameLetters(progress.childName);
   return {
@@ -93,6 +111,7 @@ export function buildTask(itemId, { progress, rng = Math.random }) {
     fs: () => { assertKnown(FIRST_SOUND_WORDS[arg], itemId); return firstSoundTask(arg, rng); },
     ls: () => { assertKnown(LETTER_ORDER.includes(arg), itemId); return letterSoundTask(arg, progress, rng); },
     blend: () => { assertKnown(BLEND_WORDS.includes(arg), itemId); return blendTask(arg, rng); },
+    intro: () => { assertKnown(LETTER_ORDER.includes(arg), itemId); return introTask(arg); },
     sight: () => { assertKnown(SIGHT_WORDS[arg], itemId); return sightWordTask(arg, rng); },
     name: () => { assertKnown(nameLetters(progress.childName).length > 0, itemId); return nameTask(progress, rng); },
   };

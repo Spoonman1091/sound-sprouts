@@ -52,6 +52,9 @@ const PROMPT_TIPS = Object.freeze({
   which_rhymes_with: LEAD_IN,
   find_the_letter: LEAD_IN,
   find_the_word: LEAD_IN,
+  this_is: 'The letter\'s name plays right after this, so let your voice trail off.',
+  it_says: LEAD_IN,
+  your_turn: 'The sound plays right after this; then she gets a moment to say it herself.',
 });
 
 const SIGHT_WORD_TIPS = Object.freeze({

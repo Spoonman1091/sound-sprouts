@@ -1,7 +1,7 @@
 import { CONFIG } from '../config.js';
 
 export function createProgress() {
-  return { version: CONFIG.SCHEMA_VERSION, childName: '', items: {}, sessions: [] };
+  return { version: CONFIG.SCHEMA_VERSION, childName: '', items: {}, sessions: [], introduced: [] };
 }
 
 const attemptsOf = (progress, itemId) => progress.items[itemId]?.attempts ?? [];
@@ -49,3 +49,11 @@ export function lastSeen(progress, itemId) {
 }
 
 export const setChildName = (progress, childName) => ({ ...progress, childName });
+
+// Sounds she has been introduced to ("Meet the letter"). Older saves have no list: nothing met yet.
+export const hasMet = (progress, sound) => (progress.introduced ?? []).includes(sound);
+
+export function markIntroduced(progress, sound) {
+  const met = progress.introduced ?? [];
+  return { ...progress, introduced: met.includes(sound) ? met : [...met, sound] };
+}

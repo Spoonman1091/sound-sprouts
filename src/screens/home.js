@@ -4,7 +4,7 @@ import { CONFIG } from '../config.js';
 import { onLongPress } from '../ui/long-press.js';
 import { renderGarden } from './garden.js';
 
-export function renderHome(container, { progress, onPlay, onParent }) {
+export function renderHome(container, { progress, onPlay, onParent, onMeet }) {
   const play = el('button', { class: 'play', 'aria-label': 'Play' },
     [el('img', { src: imgPath('seedling'), alt: '' }), el('span', { 'aria-hidden': 'true' }, ['Play'])]);
   play.addEventListener('click', onPlay, { once: true });
@@ -13,7 +13,7 @@ export function renderHome(container, { progress, onPlay, onParent }) {
   container.replaceChildren(el('div', { class: 'home' }, [
     gear,
     el('h1', { class: 'title' }, ['Sound Sprouts']),
-    renderGarden(progress),
+    renderGarden(progress, { onMeet }),
     play,
   ]));
 }

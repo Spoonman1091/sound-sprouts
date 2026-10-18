@@ -8,7 +8,7 @@ const v1 = (items) => ({ version: 1, childName: 'Ava', items, sessions: [] });
 describe('migrateProgress from version 1', () => {
   it('upgrades to the current version and keeps everything else', () => {
     const out = migrateProgress(v1({}));
-    expect(out).toEqual({ version: CONFIG.SCHEMA_VERSION, childName: 'Ava', items: {}, sessions: [] });
+    expect(out).toEqual({ version: CONFIG.SCHEMA_VERSION, childName: 'Ava', items: {}, sessions: [], introduced: [] });
     expect(CONFIG.SCHEMA_VERSION).toBe(2);
   });
 
@@ -36,7 +36,14 @@ describe('migrateProgress from version 1', () => {
   });
 
   it('passes current-version progress through untouched', () => {
-    const current = { version: CONFIG.SCHEMA_VERSION, childName: '', items: { 'ls:s': { attempts: [], masteredAt: 1, parentMarked: true } }, sessions: [] };
-    expect(migrateProgress(current)).toBe(current);
+    const current = { version: CONFIG.SCHEMA_VERSION, childName: '', items: { 'ls:s': { attempts: [], masteredAt: 1, parentMarked: true } }, sessions: [], introduced: ['s'] };
+    expect(migrateProgress(current)).toEqual(current);
+  });
+
+  it('counts sounds she has already practised as met, so she is not re-introduced to them', () => {
+    const items = { 'ls:s': { attempts: tries([[true, 's1']]), masteredAt: null }, 'fs:a': { attempts: tries([[true, 's1']]), masteredAt: null }, 'ls:t': { attempts: [], masteredAt: 1 } };
+    const out = migrateProgress({ version: CONFIG.SCHEMA_VERSION, childName: '', items, sessions: [] });
+    expect(out.introduced).toEqual(['s']);
   });
 });
+

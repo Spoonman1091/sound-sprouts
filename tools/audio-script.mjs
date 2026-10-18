@@ -15,6 +15,10 @@ export const PROMPT_TEXT = Object.freeze({
   new_flower: 'Wow! A new flower bloomed!',
   lets_play: "Let's play!",
   find_the_word: 'Find the word...',
+  this_is: 'This is the letter...',
+  it_says: 'It says...',
+  trace_it: 'Trace it with your finger!',
+  your_turn: 'Your turn! Say it...',
 });
 
 // Spelled phonetically because TTS often reads a bare "a" as "uh".

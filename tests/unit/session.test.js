@@ -101,5 +101,21 @@ describe('runSession', () => {
     expect(seenDeps[0].leadInGapMs).toBe(CONFIG.LEAD_IN_GAP_MS);
     expect(CONFIG.LEAD_IN_GAP_MS).toBeGreaterThanOrEqual(500);
   });
-});
 
+  it('marks introductions as met instead of scoring them', async () => {
+    const run = vi.fn(async (_stage, task) => (task.activity === 'intro' ? { introduced: true } : { firstTry: true }));
+    const result = await runSession({
+      container: document.createElement('div'),
+      progress: createProgress(),
+      planIds: ['intro:s', 'ls:s'],
+      sessionId: 's',
+      deps: { player: fakePlayer(), activities: { pickOne: run, blend: run, nameSpell: run, intro: run }, wait: async () => {} },
+      save: () => {},
+      now: () => 1,
+      rng: seededRng(1),
+    });
+    expect(result.introduced).toEqual(['s']);
+    expect(result.items['intro:s']).toBeUndefined();
+    expect(result.items['ls:s'].attempts).toHaveLength(1);
+  });
+});

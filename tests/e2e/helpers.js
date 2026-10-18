@@ -30,13 +30,41 @@ async function spellName(page, name) {
   }
 }
 
-async function answerCurrent(page, name) {
+// Drag the mouse along the letter's guide, the way a finger would trace it.
+export async function traceIntro(page) {
+  const intro = page.locator('.intro');
+  await expect(intro).toHaveAttribute('data-step', 'trace');
+  const svg = intro.locator('svg.trace');
+  await expect(svg).toHaveAttribute('data-ready', 'true');
+  const points = await svg.evaluate((s) => {
+    const ctm = s.getScreenCTM();
+    return JSON.parse(s.dataset.checkpoints).map(([x, y]) => {
+      const p = new DOMPoint(x, y).matrixTransform(ctm);
+      return [p.x, p.y];
+    });
+  });
+  await page.mouse.move(...points[0]);
+  await page.mouse.down();
+  for (const [x, y] of points) await page.mouse.move(x, y);
+  await page.mouse.up();
+}
+
+export async function answerCurrent(page, name = '') {
   const activity = page.locator('.stage > .activity');
   await activity.waitFor();
   const cls = await activity.getAttribute('class');
+  if (cls.includes('intro')) return traceIntro(page);
   if (cls.includes('name-spell')) return spellName(page, name);
   if (cls.includes('blend')) return blendWord(page);
   return pickCorrect(page);
+}
+
+// Answer the activity on screen, then wait out the pause until it has faded away.
+export async function answerNext(page, name = '') {
+  await page.locator('.stage > .activity').waitFor();
+  const current = await page.locator('.stage > .activity').elementHandle();
+  await answerCurrent(page, name);
+  await page.waitForFunction((el) => !el.isConnected, current, { timeout: 15_000 });
 }
 
 export async function playWholeSession(page, { name = '' } = {}) {
@@ -45,10 +73,7 @@ export async function playWholeSession(page, { name = '' } = {}) {
   await dots.first().waitFor();
   const total = await dots.count();
   for (let step = 0; step < total; step += 1) {
-    const current = await page.locator('.stage > .activity').elementHandle();
-    await answerCurrent(page, name);
-    // Wait out the pause between activities: the answered one must be gone before reading the next.
-    await page.waitForFunction((el) => !el.isConnected, current, { timeout: 15_000 });
+    await answerNext(page, name);
     if (step < total - 1) await expect(page.locator('.dot.filled')).toHaveCount(step + 1);
   }
   await expect(page.locator('.done')).toBeVisible();

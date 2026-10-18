@@ -10,11 +10,18 @@ function plotFace(status) {
   return image ? el('img', { src: imgPath(image), alt: '' }) : el('span', { class: 'seed' });
 }
 
-export function renderGarden(progress, { bloomed = [] } = {}) {
-  return el('div', { class: 'garden', 'aria-hidden': 'true' }, LETTER_ORDER.map((letter) => {
-    const status = letterStatus(progress, letter);
-    const bloom = bloomed.includes(letter) ? ' bloom' : '';
-    return el('div', { class: `plot ${status}${bloom}`, dataset: { letter, status } },
-      [plotFace(status), el('span', { class: 'plot-letter' }, [letter])]);
-  }));
+// With onMeet, open plots are buttons that replay the letter's introduction; seeds stay closed.
+function renderPlot(progress, letter, { bloomed, onMeet }) {
+  const status = letterStatus(progress, letter);
+  const bloom = bloomed.includes(letter) ? ' bloom' : '';
+  const face = [plotFace(status), el('span', { class: 'plot-letter', 'aria-hidden': 'true' }, [letter])];
+  const props = { class: `plot ${status}${bloom}`, dataset: { letter, status } };
+  if (!onMeet || status === 'seed') return el('div', { ...props, 'aria-hidden': 'true' }, face);
+  const button = el('button', { ...props, 'aria-label': `Meet ${letter}` }, face);
+  button.addEventListener('click', () => onMeet(letter));
+  return button;
+}
+
+export function renderGarden(progress, { bloomed = [], onMeet } = {}) {
+  return el('div', { class: 'garden' }, LETTER_ORDER.map((letter) => renderPlot(progress, letter, { bloomed, onMeet })));
 }

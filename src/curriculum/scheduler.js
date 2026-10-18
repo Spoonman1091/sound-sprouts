@@ -3,7 +3,7 @@ import { LETTER_ORDER, RHYME_SETS, FIRST_SOUND_WORDS, SIGHT_WORDS } from './unit
 import { readyBlends } from './blends.js';
 import { unlockedLetters } from './unlock.js';
 import { shuffle } from './random.js';
-import { isMastered, isStruggling, lastSeen } from '../state/progress.js';
+import { isMastered, isStruggling, lastSeen, hasMet } from '../state/progress.js';
 import { nameLetters } from '../state/name.js';
 
 const isRhyme = (id) => id.startsWith('rhyme:');
@@ -58,3 +58,11 @@ export function planSession(progress, rng = Math.random) {
   const body = [...firstPass, ...repeatsThenReview(firstPass, focus, review)];
   return dedupeAdjacent([warmup, ...body]).slice(0, CONFIG.SESSION_LENGTH);
 }
+
+// Open sounds she has not been introduced to yet; mastered ones (e.g. marked by a parent) are skipped.
+export const introsDue = (progress) =>
+  unlockedLetters(progress).filter((l) => !isMastered(progress, `ls:${l}`) && !hasMet(progress, l));
+
+// A lesson: "Meet the letter" for any new sounds first, then the usual practice.
+export const planLesson = (progress, rng = Math.random) =>
+  [...introsDue(progress).map((l) => `intro:${l}`), ...planSession(progress, rng)];

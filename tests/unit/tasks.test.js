@@ -167,5 +167,26 @@ describe('buildTask', () => {
     expect(task.choices).toHaveLength(3);
     expect(task.choices.filter((c) => c.correct).map((c) => c.id)).toEqual(['sh']);
   });
+
+  it('builds a letter introduction with its name, sound, example pictures and tracing guide', () => {
+    const task = buildTask('intro:s', { progress: fresh, rng: seededRng(1) });
+    expect(task).toMatchObject({ activity: 'intro', sound: 's', names: [letterName('s')], soundClip: phoneme('s') });
+    expect(task.examples.map((e) => e.id)).toEqual(FIRST_SOUND_WORDS.s);
+    task.examples.forEach((e) => expect(e).toMatchObject({ img: `assets/img/${e.id}.svg`, audio: word(e.id) }));
+    expect(task.strokes.strokes.length).toBeGreaterThan(0);
+  });
+
+  it('names each letter of a multi-letter sound, and finds example words for sounds with no first-sound pictures', () => {
+    const sh = buildTask('intro:sh', { progress: fresh, rng: seededRng(1) });
+    expect(sh.names).toEqual([letterName('s'), letterName('h')]);
+    const ng = buildTask('intro:ng', { progress: fresh, rng: seededRng(1) });
+    expect(ng.examples.length).toBeGreaterThan(0);
+    ng.examples.forEach((e) => expect(e.id).toContain('ng'));
+    expect(buildTask('intro:i', { progress: fresh, rng: seededRng(1) }).examples.length).toBeGreaterThan(0);
+  });
+
+  it.each(['intro:zz', 'intro:'])('throws for unknown introduction %s', (id) => {
+    expect(() => buildTask(id, { progress: fresh })).toThrow(/Unknown item/);
+  });
 });
 
