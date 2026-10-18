@@ -26,6 +26,11 @@ export const CONFIG = Object.freeze({
   TRACE_DONE_COVERAGE: 0.8,
   TRACE_HELP_MS: 20_000,
   SAY_PAUSE_MS: 2500,
+  // The "watch me" demonstration before she traces: time per step along a stroke, between strokes,
+  // and to look at the finished letter before it clears.
+  DEMO_STEP_MS: 50,
+  DEMO_STROKE_GAP_MS: 500,
+  DEMO_HOLD_MS: 800,
   INTRO_EXAMPLES: 2,
   PARENT_HOLD_MS: 2000,
   NAME_MAX_LENGTH: 20,

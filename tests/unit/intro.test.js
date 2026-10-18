@@ -71,6 +71,39 @@ describe('runIntro', () => {
     expect(done).toHaveBeenCalledWith({ introduced: true });
   });
 
+  it('first shows how: says "Watch me", then a finger draws each stroke in order before she traces', async () => {
+    const root = document.createElement('div');
+    const { log, player } = clipLog();
+    const twoStrokes = { ...task, strokes: { strokes: [[[0, 0], [0, 60]], [[-20, 30], [20, 30]]], width: 40, height: 60 } };
+    const steps = [];
+    const wait = (ms) => {
+      const demo = root.querySelector('.demo');
+      if (ms === CONFIG.DEMO_STEP_MS) steps.push([...demo.querySelectorAll('polyline')].map((l) => l.getAttribute('points').split(' ').length));
+      return ms === CONFIG.TRACE_HELP_MS ? never() : Promise.resolve();
+    };
+    runIntro(root, twoStrokes, { player, wait });
+    await flush();
+    expect(log.indexOf(prompt('watch_me'))).toBeGreaterThan(-1);
+    expect(log.indexOf(prompt('watch_me'))).toBeLessThan(log.indexOf(prompt('trace_it')));
+    const first = createTrace([twoStrokes.strokes.strokes[0]]).checkpoints.length;
+    const second = createTrace([twoStrokes.strokes.strokes[1]]).checkpoints.length;
+    expect(steps).toHaveLength(first + second);
+    expect(steps[first - 1]).toEqual([first]);
+    expect(steps[first + second - 1]).toEqual([first, second]);
+    expect(root.querySelector('.demo')).toBeNull();
+  });
+
+  it('ignores her finger while the demonstration is drawing', async () => {
+    const root = document.createElement('div');
+    const step = deferred();
+    runIntro(root, task, { player: fakePlayer(), wait: (ms) => (ms === CONFIG.DEMO_STEP_MS ? step.promise : noHelp(ms)) });
+    await flush();
+    expect(root.querySelector('.demo .pen')).not.toBeNull();
+    expect(root.querySelector('svg.trace').dataset.ready).toBeUndefined();
+    trace(root, along);
+    expect(inked(root)).toBe(0);
+  });
+
   it('fills in the letter as she traces, even while "Trace it!" is still playing', async () => {
     const root = document.createElement('div');
     const instruction = deferred();

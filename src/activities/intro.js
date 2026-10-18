@@ -2,17 +2,11 @@ import { el } from '../ui/dom.js';
 import { prompt } from '../audio/clips.js';
 import { CONFIG } from '../config.js';
 import { createTrace, traceTo } from '../intro/tracer.js';
+import { demonstrate } from '../intro/demo.js';
+import { svgEl } from '../ui/svg.js';
 import { settle, pause } from './settle.js';
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
 const PAD = 14;
-
-function svgEl(tag, attrs = {}, children = []) {
-  const node = document.createElementNS(SVG_NS, tag);
-  Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, String(v)));
-  node.append(...children);
-  return node;
-}
 
 const toPoints = (stroke) => stroke.map(([x, y]) => `${x},${y}`).join(' ');
 
@@ -125,6 +119,8 @@ export function runIntro(container, task, deps) {
 
   const traceIt = async () => {
     setStep('trace');
+    await player.playSequence([prompt('watch_me')]);
+    await demonstrate(view.svg, task.strokes.strokes, wait);
     // Tracing works straight away, even while the instruction is still playing.
     let finished = false;
     const tracing = waitForTrace(view, createTrace(task.strokes.strokes)).then((traced) => { finished = true; return traced; });

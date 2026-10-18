@@ -145,6 +145,8 @@ svg.trace { height: min(68vh, 560px); width: auto; max-width: 86vw; touch-action
 svg.trace .guide { fill: none; stroke: #d8c9a3; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0.5 9; }
 svg.trace .ink circle { fill: var(--leaf); }
 svg.trace .start { fill: var(--sun); }
+svg.trace .demo polyline { fill: none; stroke: var(--leaf); stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+svg.trace .pen { font-size: 26px; text-anchor: middle; dominant-baseline: hanging; pointer-events: none; }
 svg.trace .arrow { fill: var(--leaf-dark); opacity: .8; }
 svg.trace { min-width: min(50vw, 420px); }
 svg.trace .start.first { fill: var(--leaf-dark); animation: pulse 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }

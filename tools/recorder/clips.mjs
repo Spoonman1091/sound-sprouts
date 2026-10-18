@@ -54,6 +54,7 @@ const PROMPT_TIPS = Object.freeze({
   find_the_word: LEAD_IN,
   this_is: 'The letter\'s name plays right after this, so let your voice trail off.',
   it_says: LEAD_IN,
+  watch_me: 'A finger then draws the letter on screen, so say it like you are about to show her.',
   your_turn: 'The sound plays right after this; then she gets a moment to say it herself.',
 });
 

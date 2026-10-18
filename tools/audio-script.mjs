@@ -17,6 +17,7 @@ export const PROMPT_TEXT = Object.freeze({
   find_the_word: 'Find the word...',
   this_is: 'This is the letter...',
   it_says: 'It says...',
+  watch_me: 'Watch me first!',
   trace_it: 'Trace it with your finger!',
   your_turn: 'Your turn! Say it...',
 });
