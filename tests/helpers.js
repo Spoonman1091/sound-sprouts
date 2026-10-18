@@ -32,11 +32,13 @@ export function deferred() {
 }
 
 import { createProgress, recordAttempt } from '../src/state/progress.js';
+import { CONFIG } from '../src/config.js';
 
-// Master each id with 3 first-try successes across sessions m1..m3 (at = 1..3).
+// Master each id with MASTERY_STREAK first-try successes, each in its own session m1, m2, ...
+const STREAK = Array.from({ length: CONFIG.MASTERY_STREAK }, (_, i) => i + 1);
 export function withMastered(progress = createProgress(), ids = []) {
   return ids.reduce(
-    (p, itemId) => [1, 2, 3].reduce(
+    (p, itemId) => STREAK.reduce(
       (acc, n) => recordAttempt(acc, { itemId, firstTry: true, sessionId: `m${n}`, at: n }), p),
     progress,
   );

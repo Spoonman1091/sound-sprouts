@@ -153,4 +153,19 @@ describe('buildTask', () => {
     });
     expect(task.choices.filter((c) => c.correct).map((c) => c.id)).toEqual([id]);
   });
+
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])('early letter questions only ever show single letters (seed %i)', (seed) => {
+    ['s', 'a'].forEach((target) => {
+      const ids = buildTask(`ls:${target}`, { progress: fresh, rng: seededRng(seed) }).choices.map((c) => c.id);
+      ids.forEach((id) => expect(id).toHaveLength(1));
+    });
+  });
+
+  it.each([1, 2, 3, 4])('a multi-letter sound can still be offered against single letters (seed %i)', (seed) => {
+    const singles = withMastered(undefined, LETTER_ORDER.filter((l) => l.length === 1).map((l) => `ls:${l}`));
+    const task = buildTask('ls:sh', { progress: singles, rng: seededRng(seed) });
+    expect(task.choices).toHaveLength(3);
+    expect(task.choices.filter((c) => c.correct).map((c) => c.id)).toEqual(['sh']);
+  });
 });
+

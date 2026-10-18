@@ -20,6 +20,8 @@ describe('storage', () => {
   it.each([
     ['invalid JSON', '{nope'],
     ['an old schema version', JSON.stringify({ ...createProgress(), version: 0 })],
+    ['a version from the future', JSON.stringify({ ...createProgress(), version: CONFIG.SCHEMA_VERSION + 1 })],
+    ['a non-boolean parent mark', JSON.stringify({ ...createProgress(), items: { x: { attempts: [], masteredAt: 1, parentMarked: 'yes' } } })],
     ['a malformed item', JSON.stringify({ ...createProgress(), items: { x: { attempts: 'bad' } } })],
     ['a malformed session', JSON.stringify({ ...createProgress(), sessions: [{ at: 'yesterday' }] })],
     ['an over-long name', JSON.stringify({ ...createProgress(), childName: 'x'.repeat(CONFIG.NAME_MAX_LENGTH + 1) })],
@@ -28,6 +30,21 @@ describe('storage', () => {
     const storage = createMemoryStorage();
     storage.setItem(CONFIG.STORAGE_KEY, raw);
     expect(loadProgress(storage)).toEqual({ progress: createProgress(), status: 'reset' });
+  });
+
+  it('upgrades version-1 progress instead of starting fresh', () => {
+    const storage = createMemoryStorage();
+    const attempts = [['s1', 1], ['s1', 2], ['s2', 3]].map(([sessionId, at]) => ({ firstTry: true, sessionId, at }));
+    storage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({
+      version: 1, childName: 'Ava', sessions: [],
+      items: { 'ls:s': { attempts, masteredAt: 3 }, 'ls:a': { attempts: [], masteredAt: 4 } },
+    }));
+    const { progress, status } = loadProgress(storage);
+    expect(status).toBe('loaded');
+    expect(progress.version).toBe(CONFIG.SCHEMA_VERSION);
+    expect(progress.childName).toBe('Ava');
+    expect(progress.items['ls:s'].masteredAt).toBeNull();
+    expect(progress.items['ls:a']).toMatchObject({ masteredAt: 4, parentMarked: true });
   });
 
   it('keeps unreadable data aside so the parent is told even after the next save', () => {

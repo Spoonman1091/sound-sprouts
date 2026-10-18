@@ -23,17 +23,27 @@ describe('recordAttempt', () => {
 });
 
 describe('mastery', () => {
-  it('needs MASTERY_STREAK first-try successes across two sessions', () => {
-    let p = attempt(createProgress(), 'ls:s', true, 's1', 1);
-    p = attempt(p, 'ls:s', true, 's1', 2);
+  it('needs 4 first-try successes in a row, over at least 3 lessons', () => {
+    expect(CONFIG.MASTERY_STREAK).toBe(4);
+    expect(CONFIG.MASTERY_MIN_SESSIONS).toBe(3);
+    let p = [['s1', 1], ['s1', 2], ['s2', 3]].reduce((acc, [s, at]) => attempt(acc, 'ls:s', true, s, at), createProgress());
+    p = attempt(p, 'ls:s', true, 's2', 4);
     expect(isMastered(p, 'ls:s')).toBe(false);
-    p = attempt(p, 'ls:s', true, 's2', 3);
+    p = attempt(p, 'ls:s', true, 's3', 5);
     expect(isMastered(p, 'ls:s')).toBe(true);
-    expect(p.items['ls:s'].masteredAt).toBe(3);
+    expect(p.items['ls:s'].masteredAt).toBe(5);
+  });
+
+  it('a wrong tap restarts the streak', () => {
+    const tries = [[true, 's1'], [true, 's1'], [false, 's2'], [true, 's2'], [true, 's3'], [true, 's3']];
+    let p = tries.reduce((acc, [ok, s], at) => attempt(acc, 'ls:s', ok, s, at), createProgress());
+    expect(isMastered(p, 'ls:s')).toBe(false);
+    p = attempt(p, 'ls:s', true, 's4', 9);
+    expect(isMastered(p, 'ls:s')).toBe(true);
   });
 
   it('does not master when all successes are in one session', () => {
-    const p = [1, 2, 3].reduce((acc, at) => attempt(acc, 'ls:s', true, 's1', at), createProgress());
+    const p = [1, 2, 3, 4, 5].reduce((acc, at) => attempt(acc, 'ls:s', true, 's1', at), createProgress());
     expect(isMastered(p, 'ls:s')).toBe(false);
   });
 
@@ -45,8 +55,8 @@ describe('mastery', () => {
   });
 
   it('stays mastered after a later miss', () => {
-    let p = [['s1', 1], ['s1', 2], ['s2', 3]].reduce((acc, [s, at]) => attempt(acc, 'ls:s', true, s, at), createProgress());
-    p = attempt(p, 'ls:s', false, 's3', 4);
+    let p = [['s1', 1], ['s2', 2], ['s3', 3], ['s3', 4]].reduce((acc, [s, at]) => attempt(acc, 'ls:s', true, s, at), createProgress());
+    p = attempt(p, 'ls:s', false, 's4', 5);
     expect(isMastered(p, 'ls:s')).toBe(true);
   });
 
@@ -101,7 +111,7 @@ describe('markMastered', () => {
   });
 
   it('works for an item never tried, and keeps an earlier mastery date', () => {
-    expect(markMastered(createProgress(), 'ls:a', 7).items['ls:a']).toEqual({ attempts: [], masteredAt: 7 });
+    expect(markMastered(createProgress(), 'ls:a', 7).items['ls:a']).toEqual({ attempts: [], masteredAt: 7, parentMarked: true });
     const mastered = markMastered(createProgress(), 'ls:a', 7);
     expect(markMastered(mastered, 'ls:a', 99).items['ls:a'].masteredAt).toBe(7);
   });

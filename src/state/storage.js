@@ -1,15 +1,20 @@
 import { CONFIG } from '../config.js';
 import { createProgress } from './progress.js';
+import { migrateProgress } from './migrate.js';
+
+// Older saved versions this build can upgrade.
+const READABLE_VERSIONS = Object.freeze([1, CONFIG.SCHEMA_VERSION]);
 
 const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const isAttempt = (a) => isObject(a) && typeof a.firstTry === 'boolean' && typeof a.sessionId === 'string' && Number.isFinite(a.at);
 const isItem = (i) => isObject(i) && Array.isArray(i.attempts) && i.attempts.every(isAttempt)
-  && (i.masteredAt === null || Number.isFinite(i.masteredAt));
+  && (i.masteredAt === null || Number.isFinite(i.masteredAt))
+  && (i.parentMarked === undefined || typeof i.parentMarked === 'boolean');
 const isSession = (s) => isObject(s) && typeof s.sessionId === 'string' && Number.isFinite(s.at) && Number.isFinite(s.itemCount);
 
 function isValidProgress(data) {
   return isObject(data)
-    && data.version === CONFIG.SCHEMA_VERSION
+    && READABLE_VERSIONS.includes(data.version)
     && typeof data.childName === 'string' && data.childName.length <= CONFIG.NAME_MAX_LENGTH
     && isObject(data.items) && Object.values(data.items).every(isItem)
     && Array.isArray(data.sessions) && data.sessions.every(isSession);
@@ -18,7 +23,7 @@ function isValidProgress(data) {
 function parse(raw) {
   try {
     const data = JSON.parse(raw);
-    return isValidProgress(data) ? data : null;
+    return isValidProgress(data) ? migrateProgress(data) : null;
   } catch {
     return null;
   }

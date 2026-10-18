@@ -6,11 +6,15 @@ export function createProgress() {
 
 const attemptsOf = (progress, itemId) => progress.items[itemId]?.attempts ?? [];
 
-function meetsMastery(attempts) {
-  const recent = attempts.slice(-CONFIG.MASTERY_STREAK);
-  if (recent.length < CONFIG.MASTERY_STREAK) return false;
+const CURRENT_RULE = Object.freeze({ streak: CONFIG.MASTERY_STREAK, minSessions: CONFIG.MASTERY_MIN_SESSIONS });
+
+// Mastered = the last `streak` tries were all right on the first tap, spread over `minSessions` lessons.
+// A wrong tap anywhere in that window means not mastered yet.
+export function meetsMastery(attempts, { streak, minSessions } = CURRENT_RULE) {
+  const recent = attempts.slice(-streak);
+  if (recent.length < streak) return false;
   const sessions = new Set(recent.map((a) => a.sessionId));
-  return recent.every((a) => a.firstTry) && sessions.size >= CONFIG.MASTERY_MIN_SESSIONS;
+  return recent.every((a) => a.firstTry) && sessions.size >= minSessions;
 }
 
 export function recordAttempt(progress, { itemId, firstTry, sessionId, at }) {
@@ -30,7 +34,8 @@ export const isMastered = (progress, itemId) => Boolean(progress.items[itemId]?.
 // A grown-up vouching for something she already knows. Attempts are kept, so review still checks it.
 export function markMastered(progress, itemId, at) {
   const previous = progress.items[itemId] ?? { attempts: [], masteredAt: null };
-  return { ...progress, items: { ...progress.items, [itemId]: { ...previous, masteredAt: previous.masteredAt ?? at } } };
+  const masteredAt = previous.masteredAt ?? at;
+  return { ...progress, items: { ...progress.items, [itemId]: { ...previous, masteredAt, parentMarked: true } } };
 }
 
 export function isStruggling(progress, itemId) {

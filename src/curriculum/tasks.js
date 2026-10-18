@@ -45,9 +45,12 @@ function firstSoundTask(letter, rng) {
 
 function letterSoundTask(letter, progress, rng) {
   // Prefer letters already taught; top up with later letters so there are always enough choices.
+  // While she is still on single letters, the top-ups are single letters too: multi-letter
+  // sounds (sh, ee, igh...) only appear once she reaches them.
   const unlocked = unlockedLetters(progress);
+  const fitsStage = (l) => letter.length > 1 || l.length === 1;
   const taught = shuffle(unlocked.filter((l) => !soundsAlike(l, letter)), rng);
-  const later = shuffle(LETTER_ORDER.filter((l) => !unlocked.includes(l) && !soundsAlike(l, letter)), rng);
+  const later = shuffle(LETTER_ORDER.filter((l) => !unlocked.includes(l) && !soundsAlike(l, letter) && fitsStage(l)), rng);
   const distractors = [...taught, ...later].slice(0, CONFIG.LETTER_CHOICES - 1);
   return {
     activity: 'pickOne',
