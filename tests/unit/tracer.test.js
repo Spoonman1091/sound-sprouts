@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CONFIG } from '../../src/config.js';
 import { createTrace, traceTo } from '../../src/intro/tracer.js';
+import { STROKES } from '../../src/intro/strokes.js';
 
 const line = [[[0, 0], [100, 0]]];
 
@@ -37,4 +38,35 @@ describe('tracer', () => {
     expect(t.done).toBe(t.coverage >= CONFIG.TRACE_DONE_COVERAGE);
     expect(traceTo(createTrace(line, 10), [0, 0]).done).toBe(false);
   });
+
+  // Run the finger along every checkpoint of the given strokes, as a careful child would.
+  const traceStrokes = (trace, strokes) => createTrace(strokes).checkpoints.reduce(traceTo, trace);
+
+  it('does not finish a "t" until the crossbar is crossed, even though it lies close to the downstroke', () => {
+    const [down, cross] = STROKES.t;
+    const downOnly = traceStrokes(createTrace(STROKES.t), [down]);
+    expect(downOnly.done).toBe(false);
+    expect(traceStrokes(downOnly, [cross]).done).toBe(true);
+  });
+
+  it('does not finish an "i" until the dot is touched', () => {
+    const [stem, dot] = STROKES.i;
+    const stemOnly = traceStrokes(createTrace(STROKES.i), [stem]);
+    expect(stemOnly.done).toBe(false);
+    expect(traceTo(stemOnly, dot[0]).done).toBe(true);
+  });
+
+  it.each(Object.keys(STROKES))('"%s" finishes when every stroke is traced', (letter) => {
+    expect(traceStrokes(createTrace(STROKES[letter]), STROKES[letter]).done).toBe(true);
+  });
+
+  // The first stroke of "u" already goes back up its right side; its second stroke only retraces
+  // that line and adds the short tail, so tracing the first stroke rightly draws a "u".
+  const drawnByFirstStroke = ['u'];
+  const multiStroke = Object.keys(STROKES).filter((l) => STROKES[l].length > 1 && !drawnByFirstStroke.includes(l));
+
+  it.each(multiStroke)('"%s" is not finished by its first stroke alone', (letter) => {
+    expect(traceStrokes(createTrace(STROKES[letter]), [STROKES[letter][0]]).done).toBe(false);
+  });
 });
+
