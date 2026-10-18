@@ -23,7 +23,8 @@ export const CONFIG = Object.freeze({
   NARRATION_GAP_MS: 700,
   TRACE_SPACING: 6,
   TRACE_TOLERANCE: 14,
-  TRACE_DONE_COVERAGE: 0.8,
+  // All of every stroke, so she traces each one to its end (the forgiveness is in TRACE_TOLERANCE).
+  TRACE_DONE_COVERAGE: 1,
   TRACE_HELP_MS: 20_000,
   SAY_PAUSE_MS: 2500,
   // The "watch me" demonstration before she traces: time per step along a stroke, between strokes,

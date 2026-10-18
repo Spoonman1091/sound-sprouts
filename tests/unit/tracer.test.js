@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { CONFIG } from '../../src/config.js';
-import { createTrace, traceTo } from '../../src/intro/tracer.js';
+import { createTrace, traceTo, traceAlong } from '../../src/intro/tracer.js';
 import { STROKES } from '../../src/intro/strokes.js';
 
 const line = [[[0, 0], [100, 0]]];
@@ -32,10 +32,10 @@ describe('tracer', () => {
     expect(backwards.done).toBe(true);
   });
 
-  it('is done once most of the letter is covered', () => {
-    const t = [0, 10, 20, 30, 40, 50, 60, 70, 80].reduce((acc, x) => traceTo(acc, [x, 0]), createTrace(line, 10));
-    expect(CONFIG.TRACE_DONE_COVERAGE).toBeLessThan(1);
-    expect(t.done).toBe(t.coverage >= CONFIG.TRACE_DONE_COVERAGE);
+  it('is done only once the stroke is traced all the way to its end', () => {
+    const upTo = (end) => [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].filter((x) => x <= end).reduce((acc, x) => traceTo(acc, [x, 0]), createTrace(line, 10));
+    expect(upTo(80).done).toBe(false);
+    expect(upTo(100).done).toBe(true);
     expect(traceTo(createTrace(line, 10), [0, 0]).done).toBe(false);
   });
 
@@ -58,6 +58,36 @@ describe('tracer', () => {
 
   it.each(Object.keys(STROKES))('"%s" finishes when every stroke is traced', (letter) => {
     expect(traceStrokes(createTrace(STROKES[letter]), STROKES[letter]).done).toBe(true);
+  });
+
+  // Every stroke but the last in full, and the last one cut short by its final few checkpoints.
+  const stopShort = (strokes, skipped) => {
+    const last = createTrace([strokes[strokes.length - 1]]).checkpoints;
+    const rest = strokes.slice(0, -1);
+    return [...(rest.length ? createTrace(rest).checkpoints : []), ...last.slice(0, last.length - skipped)];
+  };
+
+  // The round part of "b" and "p" ends back on the stick, so its last few points are drawn by tracing the stick.
+  const endsOnAnotherStroke = ['b', 'p'];
+
+  it.each(Object.keys(STROKES).filter((l) => createTrace([STROKES[l].at(-1)]).checkpoints.length > 4 && !endsOnAnotherStroke.includes(l)))(
+    '"%s" is not finished until the end of its last stroke is traced', (letter) => {
+      const short = stopShort(STROKES[letter], 3).reduce(traceTo, createTrace(STROKES[letter]));
+      expect(short.done).toBe(false);
+    });
+
+  it('still finishes an "s" traced with a wobbly finger that never quite sits on the line', () => {
+    const [stroke] = STROKES.s;
+    const wobble = CONFIG.TRACE_TOLERANCE * 0.7;
+    const path = createTrace([stroke]).checkpoints.map(([x, y], i) => [x + (i % 2 ? wobble : -wobble) * 0.6, y + (i % 2 ? -wobble : wobble) * 0.6]);
+    const traced = path.slice(1).reduce((t, p, i) => traceAlong(t, path[i], p), traceTo(createTrace([stroke]), path[0]));
+    expect(traced.done).toBe(true);
+  });
+
+  it('finishes a stroke traced backwards, from its end to its start', () => {
+    const [stroke] = STROKES.s;
+    const backwards = createTrace([stroke]).checkpoints.reverse().reduce(traceTo, createTrace([stroke]));
+    expect(backwards.done).toBe(true);
   });
 
   // The first stroke of "u" already goes back up its right side; its second stroke only retraces

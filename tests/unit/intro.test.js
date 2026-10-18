@@ -135,6 +135,17 @@ describe('runIntro', () => {
     expect(inked(root)).toBe(afterPalm);
   });
 
+  it('counts a quick swipe everywhere the finger passed, not just where the screen noticed it', async () => {
+    const root = document.createElement('div');
+    const done = vi.fn();
+    runIntro(root, task, { player: fakePlayer(), wait: noHelp }).then(done);
+    await flush();
+    trace(root, [[0, 0], [50, 0], [100, 0]]);
+    await flush();
+    await flush();
+    expect(root.querySelector('.intro').dataset.step).toBe('say');
+  });
+
   it('starts a stroke that begins on the card around the letter', async () => {
     const root = document.createElement('div');
     runIntro(root, task, { player: fakePlayer(), wait: noHelp });

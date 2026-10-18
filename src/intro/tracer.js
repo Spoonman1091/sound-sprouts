@@ -24,8 +24,8 @@ function resample(stroke, spacing) {
 // Forgiving tracing: any part of the letter can be traced in any order, and the finger only has to
 // pass within TRACE_TOLERANCE of the guide. Each touch counts only toward the stroke the finger is on
 // (the nearest one), and only where the finger actually is along it, so going round the "a" does not
-// draw its whole stick, and the downstroke of a "t" does not cross it. The letter is done once most
-// of every stroke has been traced.
+// draw its whole stick, and the downstroke of a "t" does not cross it. The letter is done once all
+// of every stroke has been traced, so the tail of an "s" has to be finished too.
 export function createTrace(strokes, spacing = CONFIG.TRACE_SPACING) {
   const perStroke = strokes.map((stroke) => resample(stroke, spacing));
   const checkpoints = perStroke.flat();
@@ -68,4 +68,14 @@ export function traceTo(trace, point) {
   const coverage = covered.filter(Boolean).length / covered.length;
   const done = coverage >= CONFIG.TRACE_DONE_COVERAGE && everyStrokeTraced(trace, credited);
   return { ...trace, covered, credited, coverage, done };
+}
+
+// The finger moved from one reported position to the next; count everywhere in between, so a quick
+// swipe is not missed between the screen's touch updates.
+export function traceAlong(trace, from, to) {
+  const steps = Math.max(1, Math.ceil(distance(from, to) / (trace.spacing / 2)));
+  return Array.from({ length: steps }, (_, i) => {
+    const t = (i + 1) / steps;
+    return [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t];
+  }).reduce(traceTo, trace);
 }

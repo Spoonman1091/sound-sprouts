@@ -1,7 +1,7 @@
 import { el } from '../ui/dom.js';
 import { prompt } from '../audio/clips.js';
 import { CONFIG } from '../config.js';
-import { createTrace, traceTo } from '../intro/tracer.js';
+import { createTrace, traceTo, traceAlong } from '../intro/tracer.js';
 import { demonstrate } from '../intro/demo.js';
 import { svgEl } from '../ui/svg.js';
 import { settle, pause } from './settle.js';
@@ -71,16 +71,24 @@ function toLetterPoint(svg, event) {
 function waitForTrace(view, start) {
   let trace = start;
   let activePointer = null;
+  let lastPoint = null;
   return new Promise((resolve) => {
     const ink = (i) => view.ink.append(svgEl('circle', { cx: trace.checkpoints[i][0], cy: trace.checkpoints[i][1], r: 7 }));
     const move = (event) => {
       if (event.pointerId !== activePointer || trace.done) return;
-      const before = trace.covered;
-      trace = traceTo(trace, toLetterPoint(view.svg, event));
-      trace.covered.forEach((c, i) => { if (c && !before[i]) ink(i); });
+      const before = trace.credited;
+      const point = toLetterPoint(view.svg, event);
+      trace = lastPoint ? traceAlong(trace, lastPoint, point) : traceTo(trace, point);
+      lastPoint = point;
+      // Ink shows what counts, so any gap left in a stroke is a gap she can see.
+      trace.credited.forEach((c, i) => { if (c && !before[i]) ink(i); });
       if (trace.done) { activePointer = null; resolve(true); }
     };
-    const lift = (event) => { if (event.pointerId === activePointer) activePointer = null; };
+    const lift = (event) => {
+      if (event.pointerId !== activePointer) return;
+      activePointer = null;
+      lastPoint = null;
+    };
     view.area.addEventListener('pointerdown', (event) => {
       if (activePointer !== null) return;
       activePointer = event.pointerId;
