@@ -58,7 +58,7 @@ test('a parent can mark letters mastered: they bloom and the next letter opens',
   await openParentDashboard(page);
   page.on('dialog', (dialog) => dialog.accept());
   for (const row of [0, 1]) {
-    await page.locator('.letters tbody tr').nth(row).getByRole('button', { name: 'Mark mastered' }).click();
+    await page.locator('.letters tbody tr').nth(row).getByRole('button', { name: 'Mark mastered', exact: true }).click();
     await expect(page.locator('.letters tbody tr').nth(row)).toContainText('Mastered');
   }
   await page.getByRole('button', { name: 'Back to the garden' }).click();
@@ -66,14 +66,28 @@ test('a parent can mark letters mastered: they bloom and the next letter opens',
   await expect(page.locator('.plot[data-letter="t"]')).toHaveAttribute('data-status', 'sprout');
 });
 
+test('a parent can unmark a mastered letter, and it goes back to learning', async ({ page }) => {
+  await page.goto('/');
+  await openParentDashboard(page);
+  page.on('dialog', (dialog) => dialog.accept());
+  const row = page.locator('.letters tbody tr').first();
+  await row.getByRole('button', { name: 'Mark mastered', exact: true }).click();
+  await expect(row.locator('.status')).toHaveAttribute('data-color', 'green');
+  await row.getByRole('button', { name: 'Unmark mastered' }).click();
+  await expect(row).toContainText('Learning');
+  await expect(row.locator('.status')).toHaveAttribute('data-color', 'orange');
+  await page.getByRole('button', { name: 'Back to the garden' }).click();
+  await expect(page.locator('.plot[data-letter="s"]')).toHaveAttribute('data-status', 'sprout');
+});
+
 test('a parent can mark a sight word mastered', async ({ page }) => {
   await page.goto('/');
   await openParentDashboard(page);
   page.on('dialog', (dialog) => dialog.accept());
   const row = page.locator('.sight-words tbody tr').first();
-  await row.getByRole('button', { name: 'Mark mastered' }).click();
+  await row.getByRole('button', { name: 'Mark mastered', exact: true }).click();
   await expect(row).toContainText('Mastered');
-  await expect(row.getByRole('button')).toHaveCount(0);
+  await expect(row.getByRole('button', { name: 'Mark mastered', exact: true })).toHaveCount(0);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sound-sprouts:v1')));
   expect(saved.items['sight:the'].masteredAt).toBeGreaterThan(0);
 });

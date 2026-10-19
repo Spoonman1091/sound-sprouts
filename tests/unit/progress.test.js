@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CONFIG } from '../../src/config.js';
 import {
-  createProgress, recordAttempt, recordSession, isMastered, isStruggling, lastSeen, setChildName, markMastered, markIntroduced, hasMet,
+  createProgress, recordAttempt, recordSession, isMastered, isStruggling, lastSeen, setChildName, markMastered, unmarkMastered, markIntroduced, hasMet,
 } from '../../src/state/progress.js';
 
 const attempt = (p, itemId, firstTry, sessionId, at) => recordAttempt(p, { itemId, firstTry, sessionId, at });
@@ -114,6 +114,24 @@ describe('markMastered', () => {
     expect(markMastered(createProgress(), 'ls:a', 7).items['ls:a']).toEqual({ attempts: [], masteredAt: 7, parentMarked: true });
     const mastered = markMastered(createProgress(), 'ls:a', 7);
     expect(markMastered(mastered, 'ls:a', 99).items['ls:a'].masteredAt).toBe(7);
+  });
+});
+
+describe('unmarkMastered', () => {
+  it('takes away the mastery and the tries that earned it, so she has to earn it again', () => {
+    const earned = [1, 2, 3, 4].reduce((p, n) => attempt(p, 'ls:s', true, `s${n}`, n), createProgress());
+    expect(isMastered(earned, 'ls:s')).toBe(true);
+    const after = unmarkMastered(earned, 'ls:s');
+    expect(after.items['ls:s']).toEqual({ attempts: [], masteredAt: null });
+    expect(isMastered(earned, 'ls:s')).toBe(true);
+    expect(isMastered(attempt(after, 'ls:s', true, 's5', 5), 'ls:s')).toBe(false);
+  });
+
+  it('clears a grown-up mark too, and leaves other items alone', () => {
+    const marked = markMastered(markMastered(createProgress(), 'ls:s', 1), 'ls:a', 1);
+    const after = unmarkMastered(marked, 'ls:s');
+    expect(after.items['ls:s'].parentMarked).toBeUndefined();
+    expect(isMastered(after, 'ls:a')).toBe(true);
   });
 });
 

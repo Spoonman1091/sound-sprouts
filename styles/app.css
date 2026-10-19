@@ -49,8 +49,19 @@ img { pointer-events: none; -webkit-user-drag: none; }
 
 /* Garden */
 .garden { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 12px; width: min(100%, 1000px); }
+.garden-pages { display: flex; flex-direction: column; align-items: center; gap: 12px; width: min(100%, 1120px); }
+.garden-row { display: flex; align-items: center; gap: 12px; width: 100%; }
+.garden-row .garden { flex: 1; }
+.garden-page-prev, .garden-page-next { flex: none; width: 80px; height: 80px; border: none; border-radius: 50%; background: var(--leaf); color: #fff; font-size: 2.75rem; line-height: 1; box-shadow: 0 6px 0 var(--leaf-dark); cursor: pointer; }
+.garden-page-prev:active, .garden-page-next:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--leaf-dark); }
+/* A hidden arrow keeps its space, so the garden doesn't jump sideways when the page turns. */
+.garden-page-prev[hidden], .garden-page-next[hidden] { display: block; visibility: hidden; }
+.garden-dots { display: flex; gap: 10px; }
+.garden-dots .page-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--shadow); }
+.garden-dots .page-dot.current { background: var(--leaf-dark); }
 .plot { aspect-ratio: 1; border-radius: 24px; background: var(--soil); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-.plot img { width: 60%; }
+.plot { overflow: hidden; }
+.plot img { width: 48%; }
 .plot .seed { width: 16px; height: 16px; border-radius: 50%; background: #6b4a2b; }
 .plot-letter { font-size: 1.75rem; font-weight: 700; color: #fff; }
 .plot.seed .plot-letter { opacity: .35; }
@@ -111,6 +122,11 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .dashboard .actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .dashboard button { min-height: 48px; padding: 12px 20px; border-radius: 12px; background: var(--leaf); color: #fff; font-weight: 700; }
 .dashboard button.danger { background: var(--danger); }
+.dashboard button.secondary { background: none; color: var(--leaf-dark); border: 2px solid var(--leaf); }
+.dashboard .status { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; color: #fff; }
+.dashboard .status[data-color="red"] { background: #c0392b; }
+.dashboard .status[data-color="orange"] { background: #d9730d; }
+.dashboard .status[data-color="green"] { background: #2e8b3e; }
 .notice { padding: 12px; background: var(--card); border-left: 6px solid var(--sun); }
 .error { min-height: 1.5em; color: var(--danger); }
 .link { padding: 12px; background: none; text-decoration: underline; }

@@ -8,8 +8,8 @@ import { renderHome } from './screens/home.js';
 import { runSession } from './screens/session.js';
 import { runMeet } from './screens/meet.js';
 import { renderDone } from './screens/done.js';
-import { createProgress, setChildName, markMastered } from './state/progress.js';
-import { markLetterMastered } from './curriculum/unlock.js';
+import { createProgress, setChildName, markMastered, unmarkMastered } from './state/progress.js';
+import { markLetterMastered, unmarkLetterMastered } from './curriculum/unlock.js';
 import { oneAtATime } from './ui/one-at-a-time.js';
 import { renderGate } from './parent/gate.js';
 import { renderDashboard } from './parent/dashboard.js';
@@ -91,6 +91,8 @@ function showDashboard() {
     onDone: showHome,
     onMarkMastered: (letter) => { save(markLetterMastered(state.progress, letter, Date.now())); showDashboard(); },
     onMarkSightWordMastered: (id) => { save(markMastered(state.progress, `sight:${id}`, Date.now())); showDashboard(); },
+    onUnmarkMastered: (letter) => { save(unmarkLetterMastered(state.progress, letter)); showDashboard(); },
+    onUnmarkSightWordMastered: (id) => { save(unmarkMastered(state.progress, `sight:${id}`)); showDashboard(); },
     onDismissNotice: () => { dismissUnreadable(storage); state = { ...state, storageStatus: 'loaded' }; showDashboard(); },
   });
 }

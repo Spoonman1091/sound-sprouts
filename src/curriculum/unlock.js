@@ -1,6 +1,6 @@
 import { CONFIG } from '../config.js';
 import { LETTER_ORDER, FIRST_SOUND_WORDS } from './units.js';
-import { isMastered, isStruggling, markMastered } from '../state/progress.js';
+import { isMastered, isStruggling, markMastered, unmarkMastered } from '../state/progress.js';
 
 export function unlockedLetters(progress) {
   const firstUnmastered = LETTER_ORDER.findIndex((l) => !isMastered(progress, `ls:${l}`));
@@ -15,7 +15,12 @@ export function letterStatus(progress, letter) {
   return unlockedLetters(progress).includes(letter) ? 'sprout' : 'seed';
 }
 
+const letterItems = (letter) => (FIRST_SOUND_WORDS[letter] ? [`ls:${letter}`, `fs:${letter}`] : [`ls:${letter}`]);
+
 export function markLetterMastered(progress, letter, at) {
-  const ids = FIRST_SOUND_WORDS[letter] ? [`ls:${letter}`, `fs:${letter}`] : [`ls:${letter}`];
-  return ids.reduce((acc, id) => markMastered(acc, id, at), progress);
+  return letterItems(letter).reduce((acc, id) => markMastered(acc, id, at), progress);
+}
+
+export function unmarkLetterMastered(progress, letter) {
+  return letterItems(letter).reduce(unmarkMastered, progress);
 }

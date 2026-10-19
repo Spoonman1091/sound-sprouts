@@ -38,6 +38,12 @@ export function markMastered(progress, itemId, at) {
   return { ...progress, items: { ...progress.items, [itemId]: { ...previous, masteredAt, parentMarked: true } } };
 }
 
+// A grown-up taking a mastery back. The tries that earned it go too, or the next right answer would
+// bring it straight back; she earns it again with a fresh streak.
+export function unmarkMastered(progress, itemId) {
+  return { ...progress, items: { ...progress.items, [itemId]: { attempts: [], masteredAt: null } } };
+}
+
 export function isStruggling(progress, itemId) {
   const recent = attemptsOf(progress, itemId).slice(-CONFIG.STRUGGLE_WINDOW);
   return recent.filter((a) => !a.firstTry).length >= CONFIG.STRUGGLE_MISSES;

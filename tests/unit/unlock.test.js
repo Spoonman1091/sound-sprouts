@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createProgress, recordAttempt } from '../../src/state/progress.js';
-import { unlockedLetters, letterStatus, markLetterMastered } from '../../src/curriculum/unlock.js';
+import { unlockedLetters, letterStatus, markLetterMastered, unmarkLetterMastered } from '../../src/curriculum/unlock.js';
 import { isMastered } from '../../src/state/progress.js';
 import { withMastered } from '../helpers.js';
 
@@ -27,6 +27,16 @@ describe('letterStatus', () => {
     expect(letterStatus(mastered, 's')).toBe('flower');
     const missed = [4, 5].reduce((p, at) => recordAttempt(p, { itemId: 'ls:s', firstTry: false, sessionId: 'x', at }), mastered);
     expect(letterStatus(missed, 's')).toBe('thirsty');
+  });
+});
+
+describe('unmarkLetterMastered', () => {
+  it('takes back the letter sound and its first-sound pictures, and she is back to learning it', () => {
+    const p = unmarkLetterMastered(markLetterMastered(markLetterMastered(createProgress(), 's', 1), 'a', 2), 'a');
+    ['ls:a', 'fs:a'].forEach((id) => expect(isMastered(p, id)).toBe(false));
+    expect(isMastered(p, 'ls:s')).toBe(true);
+    expect(letterStatus(p, 'a')).toBe('sprout');
+    expect(unlockedLetters(p)).toEqual(['s', 'a']);
   });
 });
 

@@ -6,6 +6,11 @@ export const STATUS_LABELS = Object.freeze({
   seed: 'Not started', sprout: 'Learning', flower: 'Mastered', thirsty: 'Needs review',
 });
 
+// Red, orange, green at a glance. "Needs review" is still mastered, so it stays green.
+export const STATUS_COLORS = Object.freeze({
+  seed: 'red', sprout: 'orange', flower: 'green', thirsty: 'green',
+});
+
 export function firstTryRate(progress, itemId) {
   const attempts = progress.items[itemId]?.attempts ?? [];
   if (attempts.length === 0) return null;

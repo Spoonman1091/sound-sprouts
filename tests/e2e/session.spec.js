@@ -6,9 +6,19 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/');
 });
 
-test('home shows the garden with two sprouts', async ({ page }) => {
-  await expect(page.locator('.plot')).toHaveCount(43);
+test('home shows the garden of single letters with two sprouts', async ({ page }) => {
+  await expect(page.locator('.plot')).toHaveCount(26);
   await expect(page.locator('.plot[data-status="sprout"]')).toHaveCount(2);
+});
+
+test('the arrow turns the garden to the letter teams and back', async ({ page }) => {
+  await page.getByRole('button', { name: 'Next page' }).click();
+  await expect(page.locator('.plot').first()).toHaveAttribute('data-letter', 'sh');
+  await expect(page.getByRole('button', { name: 'Next page' })).toBeHidden();
+  const fits = await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight);
+  expect(fits).toBe(true);
+  await page.getByRole('button', { name: 'Previous page' }).click();
+  await expect(page.locator('.plot').first()).toHaveAttribute('data-letter', 's');
 });
 
 test('a full session completes and is saved', async ({ page }) => {

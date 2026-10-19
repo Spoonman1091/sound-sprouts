@@ -10,11 +10,15 @@ import { LETTER_ORDER } from '../../src/curriculum/units.js';
 import { fakePlayer, withMastered, deferred, flush } from '../helpers.js';
 
 describe('renderGarden', () => {
-  it('draws one plot per letter with its status', () => {
+  const SINGLE = LETTER_ORDER.filter((l) => l.length === 1);
+  const MULTI = LETTER_ORDER.filter((l) => l.length > 1);
+  const shownLetters = (garden) => [...garden.querySelectorAll('.plot')].map((p) => p.dataset.letter);
+
+  it('draws one plot per single letter on the first page, with its status', () => {
     const garden = renderGarden(withMastered(undefined, ['ls:s']), { bloomed: ['s'] });
     const plots = [...garden.querySelectorAll('.plot')];
-    expect(plots.map((p) => p.dataset.letter)).toEqual([...LETTER_ORDER]);
-    expect(plots.map((p) => p.dataset.status)).toEqual(['flower', 'sprout', ...Array(LETTER_ORDER.length - 2).fill('seed')]);
+    expect(plots.map((p) => p.dataset.letter)).toEqual(SINGLE);
+    expect(plots.map((p) => p.dataset.status)).toEqual(['flower', 'sprout', ...Array(SINGLE.length - 2).fill('seed')]);
     expect(plots[0].classList.contains('bloom')).toBe(true);
     expect(plots[2].querySelector('.seed')).not.toBeNull();
   });
@@ -31,9 +35,30 @@ describe('renderGarden', () => {
     expect(onMeet).toHaveBeenCalledWith('a');
   });
 
+  it('turns to a second page of letter teams (sh, ee, ...) and back', () => {
+    const garden = renderGarden(createProgress());
+    expect(garden.querySelector('.garden-page-prev').hidden).toBe(true);
+    garden.querySelector('.garden-page-next').click();
+    expect(shownLetters(garden)).toEqual(MULTI);
+    expect(garden.querySelector('.garden-page-next').hidden).toBe(true);
+    expect(garden.querySelector('.garden-dots .current').dataset.page).toBe('1');
+    garden.querySelector('.garden-page-prev').click();
+    expect(shownLetters(garden)).toEqual(SINGLE);
+  });
+
+  it('opens on the letter teams page once she has reached them', () => {
+    const allSingles = withMastered(undefined, SINGLE.map((l) => `ls:${l}`));
+    expect(shownLetters(renderGarden(allSingles))).toEqual(MULTI);
+  });
+
+  it('opens on the page of a letter that just bloomed', () => {
+    const allSingles = withMastered(undefined, SINGLE.map((l) => `ls:${l}`));
+    expect(shownLetters(renderGarden(allSingles, { bloomed: ['q'] }))).toEqual(SINGLE);
+  });
+
   it('is not tappable when no one is listening, e.g. on the done screen', () => {
     const garden = renderGarden(createProgress());
-    expect(garden.querySelector('button')).toBeNull();
+    expect(garden.querySelector('button.plot')).toBeNull();
   });
 });
 

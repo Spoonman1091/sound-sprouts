@@ -76,11 +76,37 @@ describe('renderDashboard', () => {
     expect(root.textContent).toContain('1 of 4 sight words mastered');
   });
 
-  it('offers "Mark mastered" only for letters not yet mastered', () => {
+  it('offers "Mark mastered" for letters not yet mastered, and "Unmark mastered" for mastered ones', () => {
     const { root } = render({ progress: withMastered(undefined, ['ls:s']) });
     const rows = [...root.querySelectorAll('.letters tbody tr')];
-    expect(rows[0].querySelector('button')).toBeNull();
+    expect(rows[0].querySelector('button').textContent).toBe('Unmark mastered');
     expect(rows[1].querySelector('button').textContent).toBe('Mark mastered');
+  });
+
+  it('colors each status: not started red, learning orange, mastered green', () => {
+    const { root } = render({ progress: withMastered(undefined, ['ls:s', 'sight:the']) });
+    const statusOf = (table, row) => root.querySelectorAll(`.${table} tbody tr`)[row].cells[1].querySelector('.status').dataset.color;
+    expect([0, 1, 2].map((row) => statusOf('letters', row))).toEqual(['green', 'orange', 'red']);
+    expect([0, 1].map((row) => statusOf('sight-words', row))).toEqual(['green', 'red']);
+  });
+
+  it('unmarks a letter only after the parent confirms', () => {
+    const progress = withMastered(undefined, ['ls:s']);
+    const yes = render({ progress }, { onUnmarkMastered: vi.fn(), confirmFn: vi.fn(() => true) });
+    yes.root.querySelectorAll('.letters tbody tr')[0].querySelector('button').click();
+    expect(yes.h.confirmFn).toHaveBeenCalledWith(expect.stringContaining('“s”'));
+    expect(yes.h.onUnmarkMastered).toHaveBeenCalledWith('s');
+    const no = render({ progress }, { onUnmarkMastered: vi.fn(), confirmFn: vi.fn(() => false) });
+    no.root.querySelectorAll('.letters tbody tr')[0].querySelector('button').click();
+    expect(no.h.onUnmarkMastered).not.toHaveBeenCalled();
+  });
+
+  it('unmarks a sight word only after the parent confirms', () => {
+    const progress = withMastered(undefined, ['sight:the']);
+    const yes = render({ progress }, { onUnmarkSightWordMastered: vi.fn(), confirmFn: vi.fn(() => true) });
+    yes.root.querySelectorAll('.sight-words tbody tr')[0].querySelector('button').click();
+    expect(yes.h.confirmFn).toHaveBeenCalledWith(expect.stringContaining('“the”'));
+    expect(yes.h.onUnmarkSightWordMastered).toHaveBeenCalledWith('the');
   });
 
   it('marks a letter mastered only after the parent confirms', () => {
@@ -99,7 +125,7 @@ describe('renderDashboard', () => {
     expect(rows.map((tr) => tr.cells[0].textContent)).toEqual(['the', 'I', 'a', 'is']);
     expect(rows[0].textContent).toContain('Mastered');
     expect(rows[1].textContent).toContain('Not started');
-    expect(rows[0].querySelector('button')).toBeNull();
+    expect(rows[0].querySelector('button').textContent).toBe('Unmark mastered');
     expect(rows[1].querySelector('button').textContent).toBe('Mark mastered');
   });
 
