@@ -8,6 +8,8 @@ import { seededRng, withMastered } from '../helpers.js';
 
 const allLetterSounds = LETTER_ORDER.map((l) => `ls:${l}`);
 const allFirstSounds = Object.keys(FIRST_SOUND_WORDS).map((l) => `fs:${l}`);
+const rhymeLetters = LETTER_ORDER.slice(0, CONFIG.RHYMES_AFTER_LETTERS).map((l) => `ls:${l}`);
+const rhymesReady = withMastered(undefined, rhymeLetters);
 
 describe('helpers', () => {
   it('interleave alternates and keeps leftovers', () => {
@@ -27,9 +29,9 @@ describe('helpers', () => {
 });
 
 describe('availableItems', () => {
-  it('starts with rhymes and the first two letters only', () => {
+  it('starts with the first two letters only, and no rhymes yet', () => {
     const items = availableItems(createProgress());
-    expect(items).toEqual(expect.arrayContaining(['rhyme:0', 'ls:s', 'fs:s', 'ls:a', 'fs:a']));
+    expect(items).toEqual(['ls:s', 'fs:s', 'ls:a', 'fs:a']);
     expect(items.some((id) => id.startsWith('blend:'))).toBe(false);
     expect(items).not.toContain('ls:t');
     expect(items).not.toContain('name');
@@ -55,6 +57,12 @@ describe('availableItems', () => {
     expect(availableItems(withMastered(undefined, [...singles, 'ls:sh']))).toContain('blend:fish');
   });
 
+  it('adds rhymes once the first letters are mastered', () => {
+    expect(CONFIG.RHYMES_AFTER_LETTERS).toBe(12);
+    expect(availableItems(withMastered(undefined, rhymeLetters.slice(0, -1))).some((id) => id.startsWith('rhyme:'))).toBe(false);
+    expect(availableItems(rhymesReady)).toEqual(expect.arrayContaining(['rhyme:0', 'rhyme:8']));
+  });
+
   it('adds sight words once the first letters are mastered', () => {
     const first = LETTER_ORDER.slice(0, CONFIG.SIGHT_WORDS_AFTER_LETTERS).map((l) => `ls:${l}`);
     expect(availableItems(withMastered(undefined, first.slice(0, -1)))).not.toContain('sight:the');
@@ -71,14 +79,15 @@ describe('planSession', () => {
     const plan = planSession(createProgress(), seededRng(seed));
     expect(plan.length).toBeGreaterThan(0);
     expect(plan.length).toBeLessThanOrEqual(CONFIG.SESSION_LENGTH);
-    expect(plan[0]).toMatch(/^rhyme:/);
+    expect(plan.some((id) => id === undefined || id.startsWith('rhyme:'))).toBe(false);
     const letterItems = ['ls:s', 'fs:s', 'ls:a', 'fs:a'].filter((id) => plan.includes(id));
     expect(letterItems).toHaveLength(CONFIG.FOCUS_ITEMS);
     plan.forEach((id, i) => expect(id).not.toBe(plan[i - 1]));
   });
 
-  it.each([1, 2, 3, 4, 5])('fresh session (seed %i) caps rhymes and repeats focus items', (seed) => {
-    const plan = planSession(createProgress(), seededRng(seed));
+  it.each([1, 2, 3, 4, 5])('once rhymes open, a session (seed %i) warms up with one, caps them and repeats focus items', (seed) => {
+    const plan = planSession(rhymesReady, seededRng(seed));
+    expect(plan[0]).toMatch(/^rhyme:/);
     const rhymes = plan.filter((id) => id.startsWith('rhyme:'));
     expect(rhymes.length).toBeLessThanOrEqual(1 + CONFIG.MAX_RHYMES_PER_SESSION);
     expect(plan).toHaveLength(CONFIG.SESSION_LENGTH);
@@ -99,7 +108,7 @@ describe('planSession', () => {
   });
 
   it('review only brings back mastered items, never extra unmastered rhymes', () => {
-    const p = withMastered(undefined, ['ls:s', 'fs:s', 'rhyme:0']);
+    const p = withMastered(rhymesReady, ['rhyme:0']);
     const plan = planSession(p, seededRng(6));
     const unmasteredRhymes = plan.filter((id) => id.startsWith('rhyme:') && id !== 'rhyme:0');
     expect(unmasteredRhymes.length).toBeLessThanOrEqual(CONFIG.MAX_RHYMES_PER_SESSION + 1);

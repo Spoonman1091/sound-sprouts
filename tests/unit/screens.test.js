@@ -88,23 +88,30 @@ describe('done screen', () => {
     expect(newlyBloomed(createProgress(), withMastered(undefined, ['ls:s', 'fs:s']))).toEqual(['s']);
   });
 
-  it('celebrates new flowers and returns home on tap', async () => {
+  it('is the home garden, so she can pick her next letter straight away', () => {
     const root = document.createElement('div');
+    const onPick = vi.fn();
+    const onPlay = vi.fn();
+    renderDone(root, { before: createProgress(), after: withMastered(undefined, ['ls:s']), player: fakePlayer(), onPick, onPlay, onParent: vi.fn() });
+    expect(root.querySelector('.home-button')).toBeNull();
+    expect(root.querySelector('.plot.bloom[data-letter="s"]')).not.toBeNull();
+    root.querySelector('.plot[data-letter="c"]').click();
+    expect(onPick).toHaveBeenCalledWith('c');
+    root.querySelector('.play').click();
+    expect(onPlay).toHaveBeenCalledOnce();
+  });
+
+  it('celebrates new flowers', async () => {
     const player = fakePlayer();
-    const onHome = vi.fn();
-    await renderDone(root, { before: createProgress(), after: withMastered(undefined, ['ls:s']), player, onHome });
+    await renderDone(document.createElement('div'), { before: createProgress(), after: withMastered(undefined, ['ls:s']), player });
     expect(player.playSequence).toHaveBeenCalledWith([prompt('new_flower'), prompt('all_done')]);
-    expect(root.querySelector('.plot.bloom')).not.toBeNull();
-    root.querySelector('.home-button').click();
-    expect(player.stop).toHaveBeenCalled();
-    expect(onHome).toHaveBeenCalledOnce();
   });
 
   it('settles before celebrating', async () => {
     const gate = deferred();
     const player = fakePlayer();
     const wait = vi.fn(() => gate.promise);
-    const done = renderDone(document.createElement('div'), { before: createProgress(), after: createProgress(), player, onHome: vi.fn(), wait, settleMs: 600 });
+    const done = renderDone(document.createElement('div'), { before: createProgress(), after: createProgress(), player, wait, settleMs: 600 });
     await flush();
     expect(wait).toHaveBeenCalledWith(600);
     expect(player.playSequence).not.toHaveBeenCalled();
@@ -115,7 +122,7 @@ describe('done screen', () => {
 
   it('just says all done when nothing bloomed', async () => {
     const player = fakePlayer();
-    await renderDone(document.createElement('div'), { before: createProgress(), after: createProgress(), player, onHome: vi.fn() });
+    await renderDone(document.createElement('div'), { before: createProgress(), after: createProgress(), player });
     expect(player.playSequence).toHaveBeenCalledWith([prompt('all_done')]);
   });
 });

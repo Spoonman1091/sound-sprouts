@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createProgress, recordAttempt } from '../../src/state/progress.js';
 import { unlockedLetters, letterStatus, markLetterMastered, unmarkLetterMastered } from '../../src/curriculum/unlock.js';
-import { isMastered } from '../../src/state/progress.js';
+import { isMastered, markIntroduced } from '../../src/state/progress.js';
 import { withMastered } from '../helpers.js';
 
 describe('unlockedLetters', () => {
@@ -27,6 +27,10 @@ describe('letterStatus', () => {
     expect(letterStatus(mastered, 's')).toBe('flower');
     const missed = [4, 5].reduce((p, at) => recordAttempt(p, { itemId: 'ls:s', firstTry: false, sessionId: 'x', at }), mastered);
     expect(letterStatus(missed, 's')).toBe('thirsty');
+  });
+
+  it('sprouts a letter she has met, even one not open yet', () => {
+    expect(letterStatus(markIntroduced(createProgress(), 'c'), 'c')).toBe('sprout');
   });
 });
 

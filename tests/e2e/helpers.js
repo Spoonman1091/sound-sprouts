@@ -76,7 +76,8 @@ export async function playWholeSession(page, { name = '', start = 'Play' } = {})
     await answerNext(page, name);
     if (step < total - 1) await expect(page.locator('.dot.filled')).toHaveCount(step + 1);
   }
-  await expect(page.locator('.done')).toBeVisible();
+  // She lands straight back in the garden.
+  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
   return total;
 }
 

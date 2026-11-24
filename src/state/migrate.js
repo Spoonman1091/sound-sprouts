@@ -1,8 +1,8 @@
 import { CONFIG } from '../config.js';
 import { meetsMastery } from './progress.js';
 
-// Version 1 mastered a sound after 3 first-try successes over 2 lessons and did not record
-// which sounds a parent marked. Re-check what it mastered against the current, stricter rule.
+// Version 1 did not record which sounds a parent marked. Re-check what it mastered against the
+// current rule, in case that rule is ever stricter than version 1's.
 const V1_RULE = Object.freeze({ streak: 3, minSessions: 2 });
 
 function migrateItemFromV1(item) {

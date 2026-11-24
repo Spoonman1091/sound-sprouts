@@ -58,7 +58,7 @@ describe('storage', () => {
     expect(status).toBe('loaded');
     expect(progress.version).toBe(CONFIG.SCHEMA_VERSION);
     expect(progress.childName).toBe('Ava');
-    expect(progress.items['ls:s'].masteredAt).toBeNull();
+    expect(progress.items['ls:s'].masteredAt).toBe(3);
     expect(progress.items['ls:a']).toMatchObject({ masteredAt: 4, parentMarked: true });
   });
 

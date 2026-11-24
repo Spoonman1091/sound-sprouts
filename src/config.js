@@ -9,8 +9,11 @@ export const CONFIG = Object.freeze({
   MIN_UNLOCKED_LETTERS: 2,
   LONG_WORD_MIN_BLENDS: 5,
   SIGHT_WORDS_AFTER_LETTERS: 6,
-  MASTERY_STREAK: 4,
-  MASTERY_MIN_SESSIONS: 3,
+  // Hearing rhymes is hard at four; it waits until the first letter groups (s a t p, i n m d, g o c k) are mastered.
+  RHYMES_AFTER_LETTERS: 12,
+  // Each lesson asks a sound twice, so the streak must be reachable over two lessons.
+  MASTERY_STREAK: 3,
+  MASTERY_MIN_SESSIONS: 2,
   STRUGGLE_WINDOW: 4,
   STRUGGLE_MISSES: 2,
   ATTEMPT_HISTORY: 8,

@@ -14,9 +14,10 @@ export function availableItems(progress) {
   const letterItems = letters.flatMap((l) => (FIRST_SOUND_WORDS[l] ? [`ls:${l}`, `fs:${l}`] : [`ls:${l}`]));
   const blendItems = readyBlends(progress, masteredLetters).map((w) => `blend:${w}`);
   const nameItems = nameLetters(progress.childName).length > 0 ? ['name'] : [];
-  const sightReady = LETTER_ORDER.slice(0, CONFIG.SIGHT_WORDS_AFTER_LETTERS).every((l) => masteredLetters.includes(l));
-  const sightItems = sightReady ? Object.keys(SIGHT_WORDS).map((w) => `sight:${w}`) : [];
-  return [...nameItems, ...RHYME_SETS.map((_, i) => `rhyme:${i}`), ...letterItems, ...blendItems, ...sightItems];
+  const firstMastered = (n) => LETTER_ORDER.slice(0, n).every((l) => masteredLetters.includes(l));
+  const sightItems = firstMastered(CONFIG.SIGHT_WORDS_AFTER_LETTERS) ? Object.keys(SIGHT_WORDS).map((w) => `sight:${w}`) : [];
+  const rhymeItems = firstMastered(CONFIG.RHYMES_AFTER_LETTERS) ? RHYME_SETS.map((_, i) => `rhyme:${i}`) : [];
+  return [...nameItems, ...rhymeItems, ...letterItems, ...blendItems, ...sightItems];
 }
 
 export function sortForReview(progress, ids) {
@@ -56,7 +57,9 @@ export function planSession(progress, rng = Math.random) {
   const review = sortForReview(progress, rest.filter((id) => isMastered(progress, id)));
   const firstPass = interleave(focus, rhymes);
   const body = [...firstPass, ...repeatsThenReview(firstPass, focus, review)];
-  return dedupeAdjacent([warmup, ...body]).slice(0, CONFIG.SESSION_LENGTH);
+  // Before rhymes open there may be no warm-up.
+  const opening = warmup ? [warmup] : [];
+  return dedupeAdjacent([...opening, ...body]).slice(0, CONFIG.SESSION_LENGTH);
 }
 
 // Open sounds she has not been introduced to yet; mastered ones (e.g. marked by a parent) are skipped.

@@ -23,22 +23,27 @@ describe('recordAttempt', () => {
 });
 
 describe('mastery', () => {
-  it('needs 4 first-try successes in a row, over at least 3 lessons', () => {
-    expect(CONFIG.MASTERY_STREAK).toBe(4);
-    expect(CONFIG.MASTERY_MIN_SESSIONS).toBe(3);
-    let p = [['s1', 1], ['s1', 2], ['s2', 3]].reduce((acc, [s, at]) => attempt(acc, 'ls:s', true, s, at), createProgress());
-    p = attempt(p, 'ls:s', true, 's2', 4);
+  it('needs 3 first-try successes in a row, over at least 2 lessons', () => {
+    expect(CONFIG.MASTERY_STREAK).toBe(3);
+    expect(CONFIG.MASTERY_MIN_SESSIONS).toBe(2);
+    let p = [['s1', 1], ['s1', 2], ['s1', 3]].reduce((acc, [s, at]) => attempt(acc, 'ls:s', true, s, at), createProgress());
     expect(isMastered(p, 'ls:s')).toBe(false);
-    p = attempt(p, 'ls:s', true, 's3', 5);
+    p = attempt(p, 'ls:s', true, 's2', 4);
     expect(isMastered(p, 'ls:s')).toBe(true);
-    expect(p.items['ls:s'].masteredAt).toBe(5);
+    expect(p.items['ls:s'].masteredAt).toBe(4);
+  });
+
+  it('can be earned when each lesson asks the sound twice', () => {
+    const tries = [['s1', 1], ['s1', 2], ['s2', 3], ['s2', 4]];
+    const p = tries.reduce((acc, [s, at]) => attempt(acc, 'ls:s', true, s, at), createProgress());
+    expect(isMastered(p, 'ls:s')).toBe(true);
   });
 
   it('a wrong tap restarts the streak', () => {
-    const tries = [[true, 's1'], [true, 's1'], [false, 's2'], [true, 's2'], [true, 's3'], [true, 's3']];
+    const tries = [[true, 's1'], [true, 's1'], [false, 's2'], [true, 's2'], [true, 's2']];
     let p = tries.reduce((acc, [ok, s], at) => attempt(acc, 'ls:s', ok, s, at), createProgress());
     expect(isMastered(p, 'ls:s')).toBe(false);
-    p = attempt(p, 'ls:s', true, 's4', 9);
+    p = attempt(p, 'ls:s', true, 's3', 9);
     expect(isMastered(p, 'ls:s')).toBe(true);
   });
 

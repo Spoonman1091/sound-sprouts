@@ -46,13 +46,15 @@ function save(progress) {
   state = { ...state, progress, storageStatus: ok ? state.storageStatus : 'unavailable' };
 }
 
+// What the garden's buttons do, on the home screen and on the garden she lands in after a lesson.
+const homeActions = () => ({
+  onPlay: homeAction(() => runLesson(planLesson(state.progress))),
+  onPick: homeAction((letter) => runLesson(planPractice(state.progress, letter))),
+  onParent: homeAction(showGate),
+});
+
 function showHome() {
-  renderHome(root, {
-    progress: state.progress,
-    onPlay: homeAction(() => runLesson(planLesson(state.progress))),
-    onPick: homeAction((letter) => runLesson(planPractice(state.progress, letter))),
-    onParent: homeAction(showGate),
-  });
+  renderHome(root, { progress: state.progress, ...homeActions() });
 }
 
 async function runLesson(planIds) {
@@ -67,7 +69,7 @@ async function runLesson(planIds) {
     deps: { player },
     save,
   });
-  renderDone(root, { before, after, player, onHome: showHome, settleMs: CONFIG.SETTLE_MS });
+  renderDone(root, { before, after, player, settleMs: CONFIG.SETTLE_MS, ...homeActions() });
 }
 
 function showGate() {

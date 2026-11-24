@@ -12,10 +12,10 @@ describe('migrateProgress from version 1', () => {
     expect(CONFIG.SCHEMA_VERSION).toBe(2);
   });
 
-  it('sends a sound mastered under the old 3-in-2-lessons rule back to learning, keeping its tries', () => {
+  it('keeps a sound mastered under the 3-in-2-lessons rule, which is the rule again', () => {
     const attempts = tries([[true, 's1'], [true, 's1'], [true, 's2']]);
     const out = migrateProgress(v1({ 'ls:s': { attempts, masteredAt: 2 } }));
-    expect(out.items['ls:s']).toEqual({ attempts, masteredAt: null });
+    expect(out.items['ls:s']).toEqual({ attempts, masteredAt: 2 });
   });
 
   it('keeps sounds that meet the new rule', () => {

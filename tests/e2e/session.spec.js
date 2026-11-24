@@ -23,11 +23,15 @@ test('the arrow turns the garden to the letter teams and back', async ({ page })
 
 test('a full session completes and is saved', async ({ page }) => {
   const total = await playWholeSession(page);
-  expect(total).toBe(2 + 8);
+  // Two introductions, then s and a with no rhymes yet: 3 focus questions, each asked twice.
+  expect(total).toBe(2 + 6);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sound-sprouts:v1')));
   expect(saved.sessions).toHaveLength(1);
-  await page.getByRole('button', { name: 'Back to the garden' }).click();
-  await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
+  expect(Object.keys(saved.items).some((id) => id.startsWith('rhyme:'))).toBe(false);
+  // No Home button: she can pick her next letter right from the garden she lands in.
+  await expect(page.getByRole('button', { name: 'Back to the garden' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Practice c' }).click();
+  await expect(page.locator('.intro')).toBeVisible();
 });
 
 test('choices are big enough for small fingers', async ({ page }) => {
@@ -85,4 +89,5 @@ test('tapping any letter, even one not open yet, practises it: meet it, then a l
   expect(saved.introduced).toEqual(['m']);
   expect(saved.items['ls:m'].attempts.length + saved.items['fs:m'].attempts.length).toBe(4);
   expect(saved.sessions).toHaveLength(1);
+  await expect(page.locator('.plot[data-letter="m"]')).toHaveAttribute('data-status', 'sprout');
 });

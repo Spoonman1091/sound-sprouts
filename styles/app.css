@@ -108,9 +108,6 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .slot[data-hint]:empty::after { content: attr(data-hint); opacity: .25; }
 
 /* Done */
-.done { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; animation: enter .6s ease-out both; }
-.home-button { width: calc(var(--tap) * 1.4); height: calc(var(--tap) * 1.4); border-radius: 50%; background: var(--card); box-shadow: 0 8px 0 var(--shadow); }
-.home-button img { width: 70%; }
 
 /* Parent area */
 .gate, .dashboard, .credits main { width: min(100%, 720px); margin: 0 auto; -webkit-user-select: text; user-select: text; }
