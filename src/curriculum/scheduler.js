@@ -66,3 +66,17 @@ export const introsDue = (progress) =>
 // A lesson: "Meet the letter" for any new sounds first, then the usual practice.
 export const planLesson = (progress, rng = Math.random) =>
   [...introsDue(progress).map((l) => `intro:${l}`), ...planSession(progress, rng)];
+
+const letterItems = (letter) => (FIRST_SOUND_WORDS[letter] ? [`ls:${letter}`, `fs:${letter}`] : [`ls:${letter}`]);
+
+// A lesson on one sound she picked from the garden, open yet or not: meet it first if she never has,
+// then its questions take every other turn, with things she already knows in between.
+export function planPractice(progress, letter, rng = Math.random) {
+  const half = CONFIG.SESSION_LENGTH / 2;
+  const own = letterItems(letter);
+  const picked = Array.from({ length: half }, (_, i) => own[i % own.length]);
+  const pool = shuffle(availableItems(progress).filter((id) => !own.includes(id)), rng);
+  const others = Array.from({ length: half }, (_, i) => pool[i % pool.length]);
+  const intro = isMastered(progress, `ls:${letter}`) || hasMet(progress, letter) ? [] : [`intro:${letter}`];
+  return [...intro, ...interleave(picked, others)];
+}

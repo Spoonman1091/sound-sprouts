@@ -1,12 +1,11 @@
 import { createPlayer } from './audio/player.js';
 import { stopWhenHidden } from './audio/visibility.js';
-import { prompt, phoneme } from './audio/clips.js';
+import { prompt } from './audio/clips.js';
 import { CONFIG } from './config.js';
 import { loadProgress, saveProgress, createMemoryStorage, hasUnreadableBackup, dismissUnreadable } from './state/storage.js';
-import { planLesson } from './curriculum/scheduler.js';
+import { planLesson, planPractice } from './curriculum/scheduler.js';
 import { renderHome } from './screens/home.js';
 import { runSession } from './screens/session.js';
-import { runMeet } from './screens/meet.js';
 import { renderDone } from './screens/done.js';
 import { createProgress, setChildName, markMastered, unmarkMastered } from './state/progress.js';
 import { markLetterMastered, unmarkLetterMastered } from './curriculum/unlock.js';
@@ -48,22 +47,16 @@ function save(progress) {
 }
 
 function showHome() {
-  renderHome(root, { progress: state.progress, onPlay: homeAction(startSession), onParent: homeAction(showGate), onMeet: homeAction(meetAgain) });
+  renderHome(root, {
+    progress: state.progress,
+    onPlay: homeAction(() => runLesson(planLesson(state.progress))),
+    onPick: homeAction((letter) => runLesson(planPractice(state.progress, letter))),
+    onParent: homeAction(showGate),
+  });
 }
 
-async function meetAgain(sound) {
-  // play() must start inside the tap handler: that is what unlocks audio on iOS.
-  player.play(phoneme(sound));
-  try {
-    save(await runMeet({ container: root, sound, progress: state.progress, deps: { player } }));
-  } finally {
-    showHome();
-  }
-}
-
-async function startSession() {
+async function runLesson(planIds) {
   const before = state.progress;
-  const planIds = planLesson(before);
   // play() must start inside the tap handler: that is what unlocks audio on iOS.
   await player.play(prompt('lets_play'));
   const after = await runSession({

@@ -77,12 +77,12 @@ test('a first lesson starts by meeting s: big letter, pictures, then tracing', a
   await expect(intro).toHaveAttribute('data-step', 'say');
 });
 
-test('tapping an open garden plot meets that letter again, then goes home', async ({ page }) => {
-  await page.getByRole('button', { name: 'Meet a' }).click();
-  await expect(page.locator('.intro .intro-meet .intro-letter')).toHaveText('a');
-  await traceIntro(page);
-  await expect(page.getByRole('button', { name: 'Play' })).toBeVisible({ timeout: 15_000 });
+test('tapping any letter, even one not open yet, practises it: meet it, then a lesson on it', async ({ page }) => {
+  await expect(page.locator('.plot[data-letter="m"]')).toHaveAttribute('data-status', 'seed');
+  const total = await playWholeSession(page, { start: 'Practice m' });
+  expect(total).toBe(1 + 8);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sound-sprouts:v1')));
-  expect(saved.introduced).toEqual(['a']);
-  await expect(page.locator('.plot[data-letter="t"]')).not.toHaveAttribute('role', 'button');
+  expect(saved.introduced).toEqual(['m']);
+  expect(saved.items['ls:m'].attempts.length + saved.items['fs:m'].attempts.length).toBe(4);
+  expect(saved.sessions).toHaveLength(1);
 });

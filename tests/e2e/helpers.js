@@ -67,8 +67,8 @@ export async function answerNext(page, name = '') {
   await page.waitForFunction((el) => !el.isConnected, current, { timeout: 15_000 });
 }
 
-export async function playWholeSession(page, { name = '' } = {}) {
-  await page.getByRole('button', { name: 'Play' }).click();
+export async function playWholeSession(page, { name = '', start = 'Play' } = {}) {
+  await page.getByRole('button', { name: start, exact: true }).click();
   const dots = page.locator('.dot');
   await dots.first().waitFor();
   const total = await dots.count();

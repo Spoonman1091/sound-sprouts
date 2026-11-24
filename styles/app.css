@@ -64,7 +64,7 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .plot img { width: 48%; }
 .plot .seed { width: 16px; height: 16px; border-radius: 50%; background: #6b4a2b; }
 .plot-letter { font-size: 1.75rem; font-weight: 700; color: #fff; }
-.plot.seed .plot-letter { opacity: .35; }
+.plot.seed .plot-letter { opacity: .55; }
 .plot.bloom img { animation: bloom 1.2s ease-out both; }
 @keyframes bloom { 0% { transform: scale(.2) rotate(-20deg); } 70% { transform: scale(1.2) rotate(6deg); } 100% { transform: scale(1); } }
 

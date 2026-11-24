@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CONFIG } from '../../src/config.js';
 import { createProgress, setChildName, recordAttempt } from '../../src/state/progress.js';
-import { availableItems, sortForReview, interleave, dedupeAdjacent, planSession, introsDue, planLesson } from '../../src/curriculum/scheduler.js';
+import { availableItems, sortForReview, interleave, dedupeAdjacent, planSession, introsDue, planLesson, planPractice } from '../../src/curriculum/scheduler.js';
 import { markIntroduced, markMastered } from '../../src/state/progress.js';
 import { LETTER_ORDER, FIRST_SOUND_WORDS } from '../../src/curriculum/units.js';
 import { seededRng, withMastered } from '../helpers.js';
@@ -146,3 +146,41 @@ describe('introductions', () => {
     expect(planLesson(met, seededRng(3)).some((id) => id.startsWith('intro:'))).toBe(false);
   });
 });
+
+describe('planPractice', () => {
+  const rng = seededRng(7);
+  const count = (plan, id) => plan.filter((x) => x === id).length;
+
+  it('practises the letter she picked, even one not open yet, meeting it first', () => {
+    const plan = planPractice(createProgress(), 'm', rng);
+    expect(plan[0]).toBe('intro:m');
+    const lesson = plan.slice(1);
+    expect(lesson).toHaveLength(CONFIG.SESSION_LENGTH);
+    expect(count(lesson, 'ls:m') + count(lesson, 'fs:m')).toBe(CONFIG.SESSION_LENGTH / 2);
+    expect(count(lesson, 'ls:m')).toBeGreaterThan(0);
+    expect(count(lesson, 'fs:m')).toBeGreaterThan(0);
+  });
+
+  it('mixes in other things she knows between the picked letter, never the same question twice in a row', () => {
+    const plan = planPractice(createProgress(), 'm', rng).slice(1);
+    const others = plan.filter((id) => !id.endsWith(':m'));
+    expect(others.every((id) => availableItems(createProgress()).includes(id))).toBe(true);
+    expect(dedupeAdjacent(plan)).toEqual(plan);
+  });
+
+  it('skips the introduction once she has met the letter', () => {
+    expect(planPractice(markIntroduced(createProgress(), 'm'), 'm', rng)[0]).not.toBe('intro:m');
+  });
+
+  it('skips the introduction for a mastered letter', () => {
+    expect(planPractice(markMastered(createProgress(), 'ls:s', 1), 's', rng)).not.toContain('intro:s');
+  });
+
+  it('asks only the letter question for sounds without first-sound pictures', () => {
+    const plan = planPractice(markIntroduced(createProgress(), 'x'), 'x', rng);
+    expect(FIRST_SOUND_WORDS.x).toBeUndefined();
+    expect(count(plan, 'ls:x')).toBe(CONFIG.SESSION_LENGTH / 2);
+    expect(plan).not.toContain('fs:x');
+  });
+});
+
